@@ -46,10 +46,10 @@ Based on [vscode-generator-code](https://github.com/Microsoft/vscode-generator-c
 ## 5. Integration & Validation
 - [x] 5.1 Run `npm install` and verify dependency resolution
 - [x] 5.2 Run `npm run build` and verify all packages build
-- [ ] 5.3 Launch extension in Extension Development Host (F5)
-- [ ] 5.4 Verify `.twig` files get syntax highlighting
-- [ ] 5.5 Verify language server starts (check Output panel)
-- [ ] 5.6 Verify semantic tokens are registered (check Developer Tools)
+- [x] 5.3 Launch extension in Extension Development Host (F5)
+- [x] 5.4 Verify `.twig` files get syntax highlighting
+- [x] 5.5 Verify language server starts (check Output panel)
+- [x] 5.6 Verify semantic tokens are registered (check Developer Tools)
 
 ## Dependencies
 - Tasks 2.x, 3.x, and 4.x can be done in parallel after 1.x
