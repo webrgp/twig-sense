@@ -15,10 +15,12 @@
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit -p packages/language-server/tsconfig.json && tsc --noEmit -p packages/vscode/tsconfig.json"
   },
   "lint-staged": {
     "*.ts": [
+      "bash -c 'npm run typecheck'",
       "eslint --fix",
       "prettier --write"
     ],
