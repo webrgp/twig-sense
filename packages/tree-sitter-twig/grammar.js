@@ -11,7 +11,7 @@ module.exports = grammar({
     source_file: ($) => repeat($._node),
 
     _node: ($) =>
-      choice($.output_statement, $.statement_block, $.comment, $.html_content),
+      choice($.output_statement, $.statement_block, $.comment, $.raw_content),
 
     // {{ expression }}
     output_statement: ($) =>
@@ -132,6 +132,6 @@ module.exports = grammar({
     brackets: ($) => seq("[", optional($._expression_content), "]"),
 
     // Anything outside Twig delimiters
-    html_content: ($) => token(prec(-1, /[^{]+/)),
+    raw_content: ($) => token(prec(-1, /[^{]+/)),
   },
 });
