@@ -8,6 +8,8 @@
     "build": "node esbuild.js",
     "dev": "node esbuild.js --watch",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -16,7 +18,8 @@
     "web-tree-sitter": "^0.24.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "vitest": "^2.1.0"
   },
   "engines": {
     "node": ">=18.0.0"

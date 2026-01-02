@@ -1,0 +1,101 @@
+{# Complex Twig template for comprehensive testing #}
+{% extends "layouts/base.twig" %}
+
+{% import "macros/forms.twig" as forms %}
+{% from "macros/buttons.twig" import primaryButton, secondaryButton %}
+
+{% set pageData = {
+    title: "Complex Template",
+    description: "A comprehensive test fixture",
+    keywords: ["twig", "test", "complex"]
+} %}
+
+{% block meta %}
+    <meta name="description" content="{{ pageData.description|e('html_attr') }}">
+    <meta name="keywords" content="{{ pageData.keywords|join(', ') }}">
+{% endblock %}
+
+{% block content %}
+    {# Variables and filters #}
+    <h1>{{ pageData.title|upper }}</h1>
+    <p class="{{ isActive ? 'active' : 'inactive' }}">
+        Status: {{ status|default('unknown')|capitalize }}
+    </p>
+
+    {# Nested conditionals #}
+    {% if users is defined and users is not empty %}
+        {% if users|length > 10 %}
+            <p>Showing first 10 users</p>
+            {% set displayUsers = users|slice(0, 10) %}
+        {% else %}
+            {% set displayUsers = users %}
+        {% endif %}
+
+        {# Loop with loop variable #}
+        <ul>
+            {% for user in displayUsers %}
+                <li class="{% if loop.first %}first{% elseif loop.last %}last{% endif %}">
+                    {{ loop.index }}. {{ user.name }}
+                    {% if user.email is defined %}
+                        ({{ user.email }})
+                    {% endif %}
+                </li>
+            {% else %}
+                <li>No users found</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {# Macro usage #}
+    {{ forms.input('username', 'text', { placeholder: 'Enter username' }) }}
+    {{ primaryButton('Submit', { class: 'btn-lg' }) }}
+
+    {# Embedded styles and scripts #}
+    <style>
+        .container { max-width: 1200px; margin: 0 auto; }
+        .active { color: green; }
+        .inactive { color: gray; }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', handleSubmit);
+        });
+    </script>
+
+    {# Include with variables #}
+    {% include "partials/sidebar.twig" with { items: menuItems } only %}
+
+    {# Apply filter to block #}
+    {% apply spaceless %}
+        <div>
+            <span>No whitespace</span>
+        </div>
+    {% endapply %}
+
+    {# Set with block capture #}
+    {% set capturedContent %}
+        <p>This content is captured into a variable.</p>
+        {{ someData|json_encode }}
+    {% endset %}
+
+    {{ capturedContent|raw }}
+
+    {# Ternary and null coalescing #}
+    {{ config.debug ?? false ? 'Debug mode' : 'Production' }}
+
+    {# Tests #}
+    {% if value is divisible by(3) %}
+        <p>Divisible by 3</p>
+    {% endif %}
+
+    {% if item is same as(expectedItem) %}
+        <p>Exact match</p>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script src="/js/complex.js"></script>
+{% endblock %}
