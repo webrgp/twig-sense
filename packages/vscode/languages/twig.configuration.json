@@ -1,0 +1,43 @@
+{
+  "comments": {
+    "blockComment": ["{# ", " #}"]
+  },
+  "brackets": [
+    ["{{", "}}"],
+    ["{%", "%}"],
+    ["{#", "#}"],
+    ["(", ")"],
+    ["[", "]"],
+    ["{", "}"]
+  ],
+  "autoClosingPairs": [
+    { "open": "{{", "close": " }}" },
+    { "open": "{%", "close": " %}" },
+    { "open": "{#", "close": " #}" },
+    { "open": "(", "close": ")" },
+    { "open": "[", "close": "]" },
+    { "open": "{", "close": "}" },
+    { "open": "\"", "close": "\"", "notIn": ["string"] },
+    { "open": "'", "close": "'", "notIn": ["string"] }
+  ],
+  "surroundingPairs": [
+    ["{{", "}}"],
+    ["{%", "%}"],
+    ["{#", "#}"],
+    ["(", ")"],
+    ["[", "]"],
+    ["{", "}"],
+    ["\"", "\""],
+    ["'", "'"]
+  ],
+  "folding": {
+    "markers": {
+      "start": "\\{%-?\\s*(block|for|if|macro|embed|autoescape|apply|verbatim|sandbox|cache)\\b",
+      "end": "\\{%-?\\s*(endblock|endfor|endif|endmacro|endembed|endautoescape|endapply|endverbatim|endsandbox|endcache)\\b"
+    }
+  },
+  "indentationRules": {
+    "increaseIndentPattern": "\\{%-?\\s*(block|for|if|elseif|else|macro|embed|autoescape|apply|verbatim|sandbox|cache)\\b.*%\\}",
+    "decreaseIndentPattern": "\\{%-?\\s*(endblock|endfor|endif|elseif|else|endmacro|endembed|endautoescape|endapply|endverbatim|endsandbox|endcache)\\b.*%\\}"
+  }
+}

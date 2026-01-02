@@ -1,0 +1,14 @@
+{
+  "name": "@twig-sense/tree-sitter-twig",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for Twig templates",
+  "main": "bindings/node",
+  "scripts": {
+    "build": "tree-sitter generate && tree-sitter build --wasm",
+    "test": "tree-sitter test",
+    "parse": "tree-sitter parse"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.24.0"
+  }
+}

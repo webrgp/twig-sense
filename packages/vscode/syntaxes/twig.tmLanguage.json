@@ -1,0 +1,112 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Twig",
+  "scopeName": "text.html.twig",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#output" },
+    { "include": "#statement" },
+    { "include": "text.html.basic" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.block.twig",
+      "begin": "\\{#",
+      "end": "#\\}",
+      "captures": {
+        "0": { "name": "punctuation.definition.comment.twig" }
+      }
+    },
+    "output": {
+      "name": "meta.embedded.expression.twig",
+      "begin": "\\{\\{-?",
+      "end": "-?\\}\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.section.embedded.begin.twig" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.section.embedded.end.twig" }
+      },
+      "patterns": [{ "include": "#expression" }]
+    },
+    "statement": {
+      "name": "meta.embedded.block.twig",
+      "begin": "\\{%-?",
+      "end": "-?%\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.section.embedded.begin.twig" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.section.embedded.end.twig" }
+      },
+      "patterns": [
+        { "include": "#keyword" },
+        { "include": "#expression" }
+      ]
+    },
+    "keyword": {
+      "match": "\\b(if|else|elseif|endif|for|endfor|in|block|endblock|extends|include|set|endset|macro|endmacro|import|from|as|with|apply|endapply|autoescape|endautoescape|embed|endembed|flush|sandbox|endsandbox|use|verbatim|endverbatim|do|cache|endcache|deprecated)\\b",
+      "name": "keyword.control.twig"
+    },
+    "expression": {
+      "patterns": [
+        { "include": "#string" },
+        { "include": "#number" },
+        { "include": "#operator" },
+        { "include": "#filter" },
+        { "include": "#function" },
+        { "include": "#variable" }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.twig",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.twig",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.twig",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.twig",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "number": {
+      "match": "\\b\\d+(\\.\\d+)?\\b",
+      "name": "constant.numeric.twig"
+    },
+    "operator": {
+      "match": "(\\+|-|\\*|/|%|~|==|!=|<|>|<=|>=|\\band\\b|\\bor\\b|\\bnot\\b|\\bis\\b|\\?|:|\\.\\.)",
+      "name": "keyword.operator.twig"
+    },
+    "filter": {
+      "match": "\\|\\s*([a-zA-Z_][a-zA-Z0-9_]*)",
+      "captures": {
+        "1": { "name": "entity.name.function.filter.twig" }
+      }
+    },
+    "function": {
+      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+      "captures": {
+        "1": { "name": "entity.name.function.twig" }
+      }
+    },
+    "variable": {
+      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+      "name": "variable.other.twig"
+    }
+  }
+}

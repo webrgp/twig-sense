@@ -1,2 +1,40 @@
 # My notes
 NOTES.md
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+out/
+*.js.map
+*.d.ts
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Package files
+*.vsix
+
+# Tree-sitter
+packages/tree-sitter-twig/src/
+packages/tree-sitter-twig/build/
+packages/tree-sitter-twig/bindings/
+packages/tree-sitter-twig/*.wasm
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Test output
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*

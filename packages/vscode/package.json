@@ -1,0 +1,78 @@
+{
+  "name": "twig-sense",
+  "displayName": "Twig Sense",
+  "description": "Intelligent Twig 3.x template support for Visual Studio Code",
+  "version": "0.1.0",
+  "publisher": "twig-sense",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/twig-sense/twig-sense"
+  },
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "twig",
+    "template",
+    "symfony",
+    "php"
+  ],
+  "activationEvents": [
+    "onLanguage:twig"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "twig",
+        "aliases": [
+          "Twig",
+          "twig"
+        ],
+        "extensions": [
+          ".twig"
+        ],
+        "configuration": "./languages/twig.configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "twig",
+        "scopeName": "text.html.twig",
+        "path": "./syntaxes/twig.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "Twig Sense",
+      "properties": {
+        "twig-sense.semanticTokens.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable semantic token highlighting powered by Tree-sitter parsing"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "dev": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "vscode:prepublish": "npm run build",
+    "package": "vsce package",
+    "test": "vscode-test",
+    "clean": "rm -rf dist out"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.100.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "@vscode/vsce": "^3.0.0"
+  }
+}
