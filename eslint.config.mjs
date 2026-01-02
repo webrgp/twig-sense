@@ -12,13 +12,20 @@ export default tseslint.config(
       "**/*.js",
       "**/tree-sitter-twig/**",
       ".opencode/**",
+      "**/.vscode-test/**",
     ],
   },
   {
     files: ["**/*.ts"],
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: [
+            "*.config.ts",
+            "packages/*/vitest.config.ts",
+            "packages/vscode/test/suite/*.ts",
+          ],
+        },
       },
     },
     rules: {

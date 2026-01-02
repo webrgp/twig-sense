@@ -48,12 +48,12 @@ function decodeTokens(data: number[]): DecodedToken[] {
   let prevLine = 0;
   let prevChar = 0;
 
-  for (let i = 0; i < data.length; i += 5) {
-    const deltaLine = data[i];
-    const deltaStartChar = data[i + 1];
-    const length = data[i + 2];
-    const tokenType = data[i + 3];
-    const tokenModifiers = data[i + 4];
+  for (let i = 0; i + 4 < data.length; i += 5) {
+    const deltaLine = data[i]!;
+    const deltaStartChar = data[i + 1]!;
+    const length = data[i + 2]!;
+    const tokenType = data[i + 3]!;
+    const tokenModifiers = data[i + 4]!;
 
     const line = prevLine + deltaLine;
     const startChar = deltaLine === 0 ? prevChar + deltaStartChar : deltaStartChar;
@@ -65,14 +65,6 @@ function decodeTokens(data: number[]): DecodedToken[] {
   }
 
   return tokens;
-}
-
-function findToken(
-  tokens: DecodedToken[],
-  line: number,
-  startChar: number
-): DecodedToken | undefined {
-  return tokens.find((t) => t.line === line && t.startChar === startChar);
 }
 
 describe("generateSemanticTokens", () => {
