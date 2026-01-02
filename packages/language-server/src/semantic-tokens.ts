@@ -20,9 +20,16 @@ interface Token {
   tokenModifiers: number;
 }
 
+// Valid Twig construct types that contain tokenizable content
+const TWIG_CONSTRUCTS = new Set([
+  "output_statement",
+  "statement_block",
+  "comment",
+]);
+
 export function generateSemanticTokens(tree: Tree): number[] {
   const tokens: Token[] = [];
-  collectTokens(tree.rootNode, tokens);
+  collectTokens(tree.rootNode, tokens, false);
 
   // Sort tokens by position (line, then column)
   tokens.sort((a, b) => {
@@ -36,29 +43,32 @@ export function generateSemanticTokens(tree: Tree): number[] {
   return encodeTokens(tokens);
 }
 
-function collectTokens(node: SyntaxNode, tokens: Token[]): void {
-  // Skip error nodes but still collect from children
-  if (node.hasError) {
-    for (const child of node.children) {
-      collectTokens(child, tokens);
-    }
-    return;
-  }
+function collectTokens(
+  node: SyntaxNode,
+  tokens: Token[],
+  insideTwigConstruct: boolean
+): void {
+  // Check if we're entering a Twig construct
+  const isThisTwigConstruct = TWIG_CONSTRUCTS.has(node.type);
+  const inTwig = insideTwigConstruct || isThisTwigConstruct;
 
-  const tokenType = getTokenType(node);
-  if (tokenType !== null) {
-    tokens.push({
-      line: node.startPosition.row,
-      startChar: node.startPosition.column,
-      length: node.endPosition.column - node.startPosition.column,
-      tokenType,
-      tokenModifiers: 0,
-    });
+  // Only emit tokens for nodes inside valid Twig constructs
+  if (inTwig && !node.hasError) {
+    const tokenType = getTokenType(node);
+    if (tokenType !== null) {
+      tokens.push({
+        line: node.startPosition.row,
+        startChar: node.startPosition.column,
+        length: node.endPosition.column - node.startPosition.column,
+        tokenType,
+        tokenModifiers: 0,
+      });
+    }
   }
 
   // Recurse into children
   for (const child of node.children) {
-    collectTokens(child, tokens);
+    collectTokens(child, tokens, inTwig);
   }
 }
 

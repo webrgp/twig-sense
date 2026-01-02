@@ -76,11 +76,11 @@
 - [x] Verify WASM file is in `packages/language-server/dist/`
 
 ### 6.2 Manual testing
-- [ ] Start extension in VSCode Extension Development Host
-- [ ] Open a `.twig` file
-- [ ] Verify semantic highlighting appears (variables, keywords, filters have distinct colors)
-- [ ] Edit the file and verify highlighting updates
-- [ ] Toggle `twig-sense.semanticTokens.enabled` to false and verify highlighting falls back to TextMate
+- [x] Start extension in VSCode Extension Development Host
+- [x] Open a `.twig` file
+- [x] Verify semantic highlighting appears (variables, keywords, filters have distinct colors)
+- [x] Edit the file and verify highlighting updates
+- [x] Toggle `twig-sense.semanticTokens.enabled` to false and verify highlighting falls back to TextMate
 
 ### 6.3 Tree-sitter tests
 - [x] Run `npm run test` in `packages/tree-sitter-twig`
