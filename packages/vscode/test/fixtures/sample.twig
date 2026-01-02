@@ -1,0 +1,28 @@
+{# Sample Twig template for testing #}
+{% extends "base.twig" %}
+
+{% block title %}Sample Page{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {# Output tag with filter #}
+        <h1>{{ title|capitalize }}</h1>
+
+        {# Conditional block #}
+        {% if user %}
+            <p>Welcome, {{ user.name }}!</p>
+        {% else %}
+            <p>Welcome, guest!</p>
+        {% endif %}
+
+        {# For loop #}
+        <ul>
+            {% for item in items %}
+                <li>{{ item.name }} - {{ item.price|number_format(2) }}</li>
+            {% endfor %}
+        </ul>
+
+        {# Include another template #}
+        {% include "partials/footer.twig" %}
+    </div>
+{% endblock %}

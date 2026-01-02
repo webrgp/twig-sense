@@ -86,6 +86,7 @@
     "typecheck": "tsc --noEmit",
     "vscode:prepublish": "npm run build",
     "package": "vsce package",
+    "pretest": "tsc -p tsconfig.test.json",
     "test": "vscode-test",
     "clean": "rm -rf dist out"
   },
@@ -93,6 +94,7 @@
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/vscode": "^1.100.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
