@@ -1,14 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-  "name": "Twig",
-  "scopeName": "text.html.twig",
+  "name": "Twig HTML Injection",
+  "scopeName": "twig.injection.html",
+  "injectionSelector": "L:text.html -text.html.twig",
   "patterns": [
     { "include": "#comment" },
     { "include": "#output" },
-    { "include": "#statement" },
-    { "include": "#style-tag" },
-    { "include": "#script-tag" },
-    { "include": "text.html.basic" }
+    { "include": "#statement" }
   ],
   "repository": {
     "comment": {
@@ -109,68 +107,6 @@
     "variable": {
       "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\b",
       "name": "variable.other.twig"
-    },
-    "style-tag": {
-      "name": "meta.embedded.block.css",
-      "begin": "(<)(style)(?=[^>]*>)",
-      "beginCaptures": {
-        "1": { "name": "punctuation.definition.tag.begin.html" },
-        "2": { "name": "entity.name.tag.style.html" }
-      },
-      "end": "(</)(style)(>)",
-      "endCaptures": {
-        "1": { "name": "punctuation.definition.tag.begin.html" },
-        "2": { "name": "entity.name.tag.style.html" },
-        "3": { "name": "punctuation.definition.tag.end.html" }
-      },
-      "patterns": [
-        {
-          "begin": "(>)",
-          "beginCaptures": {
-            "1": { "name": "punctuation.definition.tag.end.html" }
-          },
-          "end": "(?=</style>)",
-          "contentName": "source.css",
-          "patterns": [
-            { "include": "#comment" },
-            { "include": "#output" },
-            { "include": "#statement" },
-            { "include": "source.css" }
-          ]
-        },
-        { "include": "text.html.basic#attribute" }
-      ]
-    },
-    "script-tag": {
-      "name": "meta.embedded.block.javascript",
-      "begin": "(<)(script)(?=[^>]*>)",
-      "beginCaptures": {
-        "1": { "name": "punctuation.definition.tag.begin.html" },
-        "2": { "name": "entity.name.tag.script.html" }
-      },
-      "end": "(</)(script)(>)",
-      "endCaptures": {
-        "1": { "name": "punctuation.definition.tag.begin.html" },
-        "2": { "name": "entity.name.tag.script.html" },
-        "3": { "name": "punctuation.definition.tag.end.html" }
-      },
-      "patterns": [
-        {
-          "begin": "(>)",
-          "beginCaptures": {
-            "1": { "name": "punctuation.definition.tag.end.html" }
-          },
-          "end": "(?=</script>)",
-          "contentName": "source.js",
-          "patterns": [
-            { "include": "#comment" },
-            { "include": "#output" },
-            { "include": "#statement" },
-            { "include": "source.js" }
-          ]
-        },
-        { "include": "text.html.basic#attribute" }
-      ]
     }
   }
 }

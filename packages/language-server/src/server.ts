@@ -5,6 +5,7 @@ import {
   TextDocumentSyncKind,
   SemanticTokensRegistrationType,
   SemanticTokensLegend,
+  CompletionParams,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import {
@@ -15,6 +16,7 @@ import {
 } from "./parser";
 import { treeCache } from "./tree-cache";
 import { generateSemanticTokens } from "./semantic-tokens";
+import { getCompletions } from "./completions";
 
 const tokenTypes = [
   "variable",
@@ -153,6 +155,15 @@ export function startServer(connection: Connection): void {
     // Generate semantic tokens from the tree
     const data = generateSemanticTokens(tree);
     return { data };
+  });
+
+  connection.onCompletion((params: CompletionParams) => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
+    }
+
+    return getCompletions(document, params);
   });
 
   connection.listen();

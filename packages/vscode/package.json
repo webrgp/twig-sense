@@ -25,7 +25,16 @@
     "onLanguage:twig"
   ],
   "main": "./dist/extension.js",
+  "extensionDependencies": [
+    "vscode.html-language-features"
+  ],
   "contributes": {
+    "htmlLanguageParticipants": [
+      {
+        "languageId": "twig",
+        "autoInsert": true
+      }
+    ],
     "languages": [
       {
         "id": "twig",
@@ -43,7 +52,16 @@
       {
         "language": "twig",
         "scopeName": "text.html.twig",
-        "path": "./syntaxes/twig.tmLanguage.json"
+        "path": "./syntaxes/twig.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.css": "css",
+          "source.js": "javascript"
+        }
+      },
+      {
+        "scopeName": "twig.injection.html",
+        "path": "./syntaxes/twig-html-injection.json",
+        "injectTo": ["text.html.basic", "text.html.derivative"]
       }
     ],
     "configuration": {
@@ -53,6 +71,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable semantic token highlighting powered by Tree-sitter parsing"
+        },
+        "twig-sense.html.semanticHighlighting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable HTML semantic highlighting in Twig files. Disable if you experience highlighting conflicts."
         }
       }
     }

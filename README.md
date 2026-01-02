@@ -5,7 +5,10 @@ A Visual Studio Code extension providing intelligent language support for Twig 3
 ## Features
 
 - **Syntax Highlighting** - Accurate tokenization with TextMate and Semantic Tokens
-- **Code Completion** - Tags, filters, functions, and tests (coming soon)
+- **HTML/CSS/JS IntelliSense** - Full HTML Language Server features in `.twig` files
+- **Emmet Support** - Expand abbreviations directly in Twig templates
+- **Twig Completions** - Keywords, filters, functions, and tests with snippets
+- **Twig in HTML** - Syntax highlighting for Twig in plain `.html` files
 - **Hover Documentation** - Inline docs for Twig built-ins (coming soon)
 
 ## Installation
@@ -14,6 +17,25 @@ Search for "Twig Sense" in the VSCode Extensions marketplace, or install from th
 
 ```bash
 code --install-extension twig-sense.twig-sense
+```
+
+## Configuration
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `twig-sense.semanticTokens.enabled` | `true` | Enable semantic token highlighting powered by Tree-sitter |
+| `twig-sense.html.semanticHighlighting` | `true` | Enable HTML semantic highlighting. Disable if experiencing conflicts |
+
+### Emmet Configuration
+
+Emmet works out of the box in `.twig` files. To customize Emmet behavior, add to your `settings.json`:
+
+```json
+{
+  "emmet.includeLanguages": {
+    "twig": "html"
+  }
+}
 ```
 
 ## Development
