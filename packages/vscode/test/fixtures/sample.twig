@@ -6,10 +6,10 @@
 {% block content %}
     <div class="container">
         {# Output tag with filter #}
-        <h1>{{ title|capitalize }}</h1>
+        <h1>{{ title|capitalize # display the page title }}</h1>
 
         {# Conditional block #}
-        {% if user %}
+        {% if user # check if user is logged in %}
             <p>Welcome, {{ user.name }}!</p>
         {% else %}
             <p>Welcome, guest!</p>

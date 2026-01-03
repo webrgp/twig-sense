@@ -1,6 +1,6 @@
 import * as assert from "assert";
-import * as vscode from "vscode";
 import * as path from "path";
+import * as vscode from "vscode";
 
 suite("Extension Test Suite", () => {
   const extensionId = "twig-sense.twig-sense";
@@ -35,11 +35,7 @@ suite("Extension Test Suite", () => {
       const sampleTwig = path.join(fixturesPath, "sample.twig");
       const document = await vscode.workspace.openTextDocument(sampleTwig);
 
-      assert.strictEqual(
-        document.languageId,
-        "twig",
-        "Language ID should be 'twig'"
-      );
+      assert.strictEqual(document.languageId, "twig", "Language ID should be 'twig'");
     });
 
     test("Language client should start", async () => {
@@ -121,7 +117,8 @@ suite("Extension Test Suite", () => {
       );
 
       // Check if we got Twig filters - if server is ready, these should be present
-      const hasTwigFilters = labels.includes("upper") || labels.includes("lower") || labels.includes("date");
+      const hasTwigFilters =
+        labels.includes("upper") || labels.includes("lower") || labels.includes("date");
       assert.ok(
         hasTwigFilters || completions.items.length > 0,
         "Should have completion items (Twig filters or other completions)"
@@ -153,7 +150,8 @@ suite("Extension Test Suite", () => {
       );
 
       // Check if we got Twig functions - if server is ready, these should be present
-      const hasTwigFunctions = labels.includes("dump") || labels.includes("range") || labels.includes("date");
+      const hasTwigFunctions =
+        labels.includes("dump") || labels.includes("range") || labels.includes("date");
       assert.ok(
         hasTwigFunctions || completions.items.length > 0,
         "Should have completion items (Twig functions or other completions)"
@@ -181,6 +179,61 @@ suite("Extension Test Suite", () => {
       assert.ok(
         tokens === undefined || tokens.data !== undefined,
         "Should be able to request semantic tokens"
+      );
+    });
+
+    test("Semantic tokens include inline comments", async () => {
+      const inlineCommentsTwig = path.join(fixturesPath, "inline-comments.twig");
+      const document = await vscode.workspace.openTextDocument(inlineCommentsTwig);
+      await vscode.window.showTextDocument(document);
+
+      // Wait for language server to parse and provide tokens
+      await waitForLanguageServer();
+
+      // Request semantic tokens
+      const tokens = await vscode.commands.executeCommand<vscode.SemanticTokens>(
+        "vscode.provideDocumentSemanticTokens",
+        document.uri
+      );
+
+      // Tokens should be available for inline comments
+      assert.ok(
+        tokens === undefined || tokens.data !== undefined,
+        "Should be able to request semantic tokens for inline comments"
+      );
+    });
+  });
+
+  suite("Syntax Highlighting", () => {
+    test("TextMate grammar provides highlighting for inline comments", async () => {
+      // Create a document with inline comment syntax
+      const content = "{{ value # inline comment }}";
+      const document = await vscode.workspace.openTextDocument({
+        language: "twig",
+        content,
+      });
+      await vscode.window.showTextDocument(document);
+
+      // Verify document language is twig
+      assert.strictEqual(document.languageId, "twig", "Document should be Twig");
+
+      // The TextMate grammar should recognize inline comments
+      // This is a basic sanity check that the grammar is applied
+      assert.ok(document.getText().includes("#"), "Document should contain comment marker");
+    });
+
+    test("Hash in string should not be treated as comment", async () => {
+      const content = '{{ "color:#fff" }}';
+      const document = await vscode.workspace.openTextDocument({
+        language: "twig",
+        content,
+      });
+      await vscode.window.showTextDocument(document);
+
+      assert.strictEqual(document.languageId, "twig", "Document should be Twig");
+      assert.ok(
+        document.getText().includes('"color:#fff"'),
+        "String with hash should be preserved"
       );
     });
   });

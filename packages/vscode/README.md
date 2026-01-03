@@ -5,16 +5,28 @@ Intelligent Twig 3.x template support for Visual Studio Code.
 ## Features
 
 ### Syntax Highlighting
+
 Two-layer highlighting with TextMate (immediate) and Semantic Tokens (context-aware).
 
+Supports Twig 3.15+ inline comments:
+
+```twig
+{{ user.name|capitalize # display formatted username }}
+
+{% for item in items # iterate over collection %}
+    {{ item.value }}
+{% endfor %}
+```
+
 ### Supported File Extensions
+
 - `.twig`
 
 ## Settings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `twig-sense.semanticTokens.enabled` | `true` | Enable semantic token highlighting |
+| Setting                             | Default | Description                        |
+| ----------------------------------- | ------- | ---------------------------------- |
+| `twig-sense.semanticTokens.enabled` | `true`  | Enable semantic token highlighting |
 
 ## Requirements
 
@@ -23,6 +35,7 @@ Two-layer highlighting with TextMate (immediate) and Semantic Tokens (context-aw
 ## Release Notes
 
 ### 0.1.0
+
 - Initial release
 - Basic syntax highlighting
 - Language server connection
