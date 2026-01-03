@@ -61,7 +61,10 @@
       {
         "scopeName": "twig.injection.html",
         "path": "./syntaxes/twig-html-injection.json",
-        "injectTo": ["text.html.basic", "text.html.derivative"]
+        "injectTo": [
+          "text.html.basic",
+          "text.html.derivative"
+        ]
       }
     ],
     "configuration": {
@@ -76,6 +79,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable HTML semantic highlighting in Twig files. Disable if you experience highlighting conflicts."
+        },
+        "twig-sense.completion.templateRoot": {
+          "type": "string",
+          "default": "templates",
+          "description": "The root directory for template files, relative to the workspace root. Used for resolving template paths in completions."
         }
       }
     }

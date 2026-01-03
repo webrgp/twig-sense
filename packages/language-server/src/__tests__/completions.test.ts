@@ -1,7 +1,33 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
+import * as path from "path";
+import Parser, { Tree } from "web-tree-sitter";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { CompletionItemKind } from "vscode-languageserver/node";
 import { detectContext, getCompletions } from "../completions";
+
+let parser: Parser;
+
+async function initTestParser(): Promise<void> {
+  const wasmPath = path.join(__dirname, "../../dist/tree-sitter.wasm");
+  await Parser.init({
+    locateFile: () => wasmPath,
+  });
+
+  parser = new Parser();
+  const langWasmPath = path.join(__dirname, "../../dist/tree-sitter-twig.wasm");
+  const TwigLang = await Parser.Language.load(langWasmPath);
+  parser.setLanguage(TwigLang);
+}
+
+function parse(content: string): Tree {
+  const tree = parser.parse(content);
+  if (!tree) throw new Error("Failed to parse document");
+  return tree;
+}
+
+beforeAll(async () => {
+  await initTestParser();
+});
 
 function createDocument(content: string): TextDocument {
   return TextDocument.create("file:///test.twig", "twig", 1, content);
@@ -141,7 +167,10 @@ describe("detectContext", () => {
 });
 
 describe("getCompletions", () => {
-  function getCompletionLabels(content: string, position: { line: number; character: number }): string[] {
+  function getCompletionLabels(
+    content: string,
+    position: { line: number; character: number }
+  ): string[] {
     const doc = createDocument(content);
     const completions = getCompletions(doc, {
       textDocument: { uri: doc.uri },
@@ -181,12 +210,8 @@ describe("getCompletions", () => {
         position: { line: 0, character: 3 },
       });
 
-      const hasKeywords = completions.some(
-        (c) => c.kind === CompletionItemKind.Keyword
-      );
-      const hasFunctions = completions.some(
-        (c) => c.kind === CompletionItemKind.Function
-      );
+      const hasKeywords = completions.some((c) => c.kind === CompletionItemKind.Keyword);
+      const hasFunctions = completions.some((c) => c.kind === CompletionItemKind.Function);
 
       expect(hasKeywords).toBe(true);
       expect(hasFunctions).toBe(true);
@@ -325,6 +350,214 @@ describe("getCompletions", () => {
       expect(dumpFunction).toBeDefined();
       expect(dumpFunction!.kind).toBe(CompletionItemKind.Function);
       expect(dumpFunction!.insertText).toBe("dump(${1:variable})");
+    });
+  });
+
+  describe("context-aware end keyword completions", () => {
+    function getCompletionLabelsWithTree(
+      content: string,
+      position: { line: number; character: number }
+    ): string[] {
+      const doc = createDocument(content);
+      const tree = parse(content);
+      const completions = getCompletions(
+        doc,
+        {
+          textDocument: { uri: doc.uri },
+          position,
+        },
+        tree
+      );
+      return completions.map((c) => c.label);
+    }
+
+    it("shows endif only when inside if block", () => {
+      // Inside if block
+      const contentInside = "{% if true %}\n  {% ";
+      const labelsInside = getCompletionLabelsWithTree(contentInside, {
+        line: 1,
+        character: 5,
+      });
+      expect(labelsInside).toContain("endif");
+
+      // Outside if block
+      const contentOutside = "{% if true %}{% endif %}\n{% ";
+      const labelsOutside = getCompletionLabelsWithTree(contentOutside, {
+        line: 1,
+        character: 3,
+      });
+      expect(labelsOutside).not.toContain("endif");
+    });
+
+    it("shows endfor only when inside for block", () => {
+      // Inside for block
+      const contentInside = "{% for item in items %}\n  {% ";
+      const labelsInside = getCompletionLabelsWithTree(contentInside, {
+        line: 1,
+        character: 5,
+      });
+      expect(labelsInside).toContain("endfor");
+
+      // Outside for block
+      const contentOutside = "{% for item in items %}{% endfor %}\n{% ";
+      const labelsOutside = getCompletionLabelsWithTree(contentOutside, {
+        line: 1,
+        character: 3,
+      });
+      expect(labelsOutside).not.toContain("endfor");
+    });
+
+    it("shows endblock only when inside block definition", () => {
+      // Inside block definition
+      const contentInside = "{% block content %}\n  {% ";
+      const labelsInside = getCompletionLabelsWithTree(contentInside, {
+        line: 1,
+        character: 5,
+      });
+      expect(labelsInside).toContain("endblock");
+
+      // Outside block definition
+      const contentOutside = "{% block content %}{% endblock %}\n{% ";
+      const labelsOutside = getCompletionLabelsWithTree(contentOutside, {
+        line: 1,
+        character: 3,
+      });
+      expect(labelsOutside).not.toContain("endblock");
+    });
+
+    it("shows endmacro only when inside macro definition", () => {
+      // Inside macro definition
+      const contentInside = "{% macro button(text) %}\n  {% ";
+      const labelsInside = getCompletionLabelsWithTree(contentInside, {
+        line: 1,
+        character: 5,
+      });
+      expect(labelsInside).toContain("endmacro");
+
+      // Outside macro definition
+      const contentOutside = "{% macro button(text) %}{% endmacro %}\n{% ";
+      const labelsOutside = getCompletionLabelsWithTree(contentOutside, {
+        line: 1,
+        character: 3,
+      });
+      expect(labelsOutside).not.toContain("endmacro");
+    });
+
+    it("does not show end keywords at top level", () => {
+      const content = "{% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 0,
+        character: 3,
+      });
+
+      expect(labels).not.toContain("endif");
+      expect(labels).not.toContain("endfor");
+      expect(labels).not.toContain("endblock");
+      expect(labels).not.toContain("endmacro");
+      expect(labels).not.toContain("endapply");
+      expect(labels).not.toContain("endautoescape");
+      expect(labels).not.toContain("endembed");
+      expect(labels).not.toContain("endsandbox");
+      expect(labels).not.toContain("endverbatim");
+      expect(labels).not.toContain("endcache");
+      expect(labels).not.toContain("endset");
+    });
+
+    it("shows multiple end keywords when nested", () => {
+      // Inside both if and for block
+      const content = "{% if true %}\n  {% for item in items %}\n    {% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 2,
+        character: 7,
+      });
+
+      expect(labels).toContain("endif");
+      expect(labels).toContain("endfor");
+      expect(labels).not.toContain("endblock");
+    });
+  });
+
+  describe("context-aware else/elseif completions", () => {
+    function getCompletionLabelsWithTree(
+      content: string,
+      position: { line: number; character: number }
+    ): string[] {
+      const doc = createDocument(content);
+      const tree = parse(content);
+      const completions = getCompletions(
+        doc,
+        {
+          textDocument: { uri: doc.uri },
+          position,
+        },
+        tree
+      );
+      return completions.map((c) => c.label);
+    }
+
+    it("shows else and elseif inside if block", () => {
+      const content = "{% if true %}\n  {% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 1,
+        character: 5,
+      });
+
+      expect(labels).toContain("else");
+      expect(labels).toContain("elseif");
+    });
+
+    it("shows else inside for block (loop else)", () => {
+      const content = "{% for item in items %}\n  {% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 1,
+        character: 5,
+      });
+
+      expect(labels).toContain("else");
+    });
+
+    it("does not show elseif inside for block", () => {
+      const content = "{% for item in items %}\n  {% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 1,
+        character: 5,
+      });
+
+      expect(labels).not.toContain("elseif");
+    });
+
+    it("does not show else or elseif at top level", () => {
+      const content = "{% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 0,
+        character: 3,
+      });
+
+      expect(labels).not.toContain("else");
+      expect(labels).not.toContain("elseif");
+    });
+
+    it("does not show else or elseif inside block definition only", () => {
+      const content = "{% block content %}\n  {% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 1,
+        character: 5,
+      });
+
+      // Inside a block but not inside if or for
+      expect(labels).not.toContain("else");
+      expect(labels).not.toContain("elseif");
+    });
+
+    it("shows else and elseif when if is nested inside block", () => {
+      const content = "{% block content %}\n  {% if true %}\n    {% ";
+      const labels = getCompletionLabelsWithTree(content, {
+        line: 2,
+        character: 7,
+      });
+
+      expect(labels).toContain("else");
+      expect(labels).toContain("elseif");
     });
   });
 });

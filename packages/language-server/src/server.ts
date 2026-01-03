@@ -187,7 +187,9 @@ export function startServer(connection: Connection): void {
       return [];
     }
 
-    return getCompletions(document, params);
+    // Get cached tree for document-aware completions
+    const tree = treeCache.get(params.textDocument.uri);
+    return getCompletions(document, params, tree);
   });
 
   connection.listen();

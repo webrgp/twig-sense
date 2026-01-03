@@ -21,10 +21,11 @@ code --install-extension twig-sense.twig-sense
 
 ## Configuration
 
-| Setting                                | Default | Description                                                          |
-| -------------------------------------- | ------- | -------------------------------------------------------------------- |
-| `twig-sense.semanticTokens.enabled`    | `true`  | Enable semantic token highlighting powered by Tree-sitter            |
-| `twig-sense.html.semanticHighlighting` | `true`  | Enable HTML semantic highlighting. Disable if experiencing conflicts |
+| Setting                                | Default     | Description                                                              |
+| -------------------------------------- | ----------- | ------------------------------------------------------------------------ |
+| `twig-sense.semanticTokens.enabled`    | `true`      | Enable semantic token highlighting powered by Tree-sitter                |
+| `twig-sense.html.semanticHighlighting` | `true`      | Enable HTML semantic highlighting. Disable if experiencing conflicts     |
+| `twig-sense.completion.templateRoot`   | `templates` | Root directory for templates, relative to workspace. For path resolution |
 
 ### Emmet Configuration
 
