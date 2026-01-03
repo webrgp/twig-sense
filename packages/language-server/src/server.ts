@@ -1,22 +1,19 @@
-import {
-  Connection,
-  InitializeParams,
-  InitializeResult,
-  TextDocumentSyncKind,
-  SemanticTokensRegistrationType,
-  SemanticTokensLegend,
-  CompletionParams,
-} from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import {
-  initializeParser,
-  isParserReady,
-  parseDocument,
-  parseDocumentIncremental,
-} from "./parser";
-import { treeCache } from "./tree-cache";
-import { generateSemanticTokens } from "./semantic-tokens";
+  CompletionParams,
+  Connection,
+  Diagnostic,
+  InitializeParams,
+  InitializeResult,
+  SemanticTokensLegend,
+  SemanticTokensRegistrationType,
+  TextDocumentSyncKind,
+} from "vscode-languageserver/node";
 import { getCompletions } from "./completions";
+import { initializeParser, isParserReady, parseDocument, parseDocumentIncremental } from "./parser";
+import { generateSemanticTokens } from "./semantic-tokens";
+import { treeCache } from "./tree-cache";
+import { validateInlineComments } from "./validators/inline-comments";
 
 const tokenTypes = [
   "variable",
@@ -39,6 +36,30 @@ const legend: SemanticTokensLegend = {
 const documents: Map<string, TextDocument> = new Map();
 
 export function startServer(connection: Connection): void {
+  // Helper function to validate document and publish diagnostics
+  async function validateDocument(uri: string): Promise<void> {
+    const config = await connection.workspace.getConfiguration("twig-sense");
+    if (config.diagnostics?.enabled === false) {
+      connection.sendDiagnostics({ uri, diagnostics: [] });
+      return;
+    }
+
+    const tree = treeCache.get(uri);
+    if (!tree) {
+      connection.sendDiagnostics({ uri, diagnostics: [] });
+      return;
+    }
+
+    const diagnostics: Diagnostic[] = [];
+
+    // Validate inline comments
+    if (config.diagnostics?.inlineComments !== false) {
+      diagnostics.push(...validateInlineComments(tree));
+    }
+
+    connection.sendDiagnostics({ uri, diagnostics });
+  }
+
   connection.onInitialize((_params: InitializeParams): InitializeResult => {
     connection.console.log("Twig Sense Language Server initializing...");
 
@@ -94,10 +115,12 @@ export function startServer(connection: Connection): void {
     const tree = parseDocument(params.textDocument.text);
     if (tree) {
       treeCache.set(params.textDocument.uri, tree);
+      // Validate after parsing
+      await validateDocument(params.textDocument.uri);
     }
   });
 
-  connection.onDidChangeTextDocument((params) => {
+  connection.onDidChangeTextDocument(async (params) => {
     const document = documents.get(params.textDocument.uri);
     if (document) {
       const updated = TextDocument.update(
@@ -110,11 +133,7 @@ export function startServer(connection: Connection): void {
       // Use incremental parsing if we have a cached tree
       const oldTree = treeCache.get(params.textDocument.uri);
       if (oldTree && isParserReady()) {
-        const newTree = parseDocumentIncremental(
-          updated.getText(),
-          oldTree,
-          params.contentChanges
-        );
+        const newTree = parseDocumentIncremental(updated.getText(), oldTree, params.contentChanges);
         if (newTree) {
           treeCache.set(params.textDocument.uri, newTree);
         }
@@ -125,12 +144,17 @@ export function startServer(connection: Connection): void {
           treeCache.set(params.textDocument.uri, tree);
         }
       }
+
+      // Validate after parsing
+      await validateDocument(params.textDocument.uri);
     }
   });
 
   connection.onDidCloseTextDocument((params) => {
     documents.delete(params.textDocument.uri);
     treeCache.delete(params.textDocument.uri);
+    // Clear diagnostics for closed document
+    connection.sendDiagnostics({ uri: params.textDocument.uri, diagnostics: [] });
     connection.console.log(`Closed: ${params.textDocument.uri}`);
   });
 

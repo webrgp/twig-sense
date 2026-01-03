@@ -1,0 +1,51 @@
+{# Test fixture for inline comment validation diagnostics #}
+
+{# === INVALID USAGE (should show warnings) === #}
+
+{# Single-line with same-line closer - INVALID #}
+{{ title # this comment consumes the closing delimiter }}
+
+{# Statement block with same-line closer - INVALID #}
+{% set value = 42 # this is invalid %}
+
+{# Trimming delimiters with same-line comment - INVALID #}
+{{- trimmed # also invalid -}}
+
+{# Multi-line where last line has comment + closer - INVALID #}
+{{
+  value
+  |filter # comment on last line with closer }}
+
+
+{# === VALID USAGE (should NOT show warnings) === #}
+
+{# Inline comment with closing delimiter on next line - VALID #}
+{{ title # this comment is valid
+}}
+
+{# Multi-line with properly placed comments - VALID #}
+{{
+  # comment on its own line
+  user.name|capitalize
+}}
+
+{# Statement block with proper newline - VALID #}
+{% set items = [1, 2, 3] # list of items
+%}
+
+{# Multiple inline comments, all properly spaced - VALID #}
+{{
+  foo # first comment
+  |bar # second comment
+  |baz # third comment
+}}
+
+{# Hash inside string (not a comment) - VALID #}
+{{ "color:#fff" }}
+{{ 'background: #000' }}
+
+{# Real-world map literal example from Twig docs - VALID #}
+{% include 'template.html' with {
+    foo: bar, # configuration option
+    baz: qux, # another option
+} %}
