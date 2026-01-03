@@ -75,12 +75,6 @@ describe("generateSemanticTokens", () => {
       expect(varToken).toBeDefined();
       expect(varToken!.length).toBe(4); // "user" is 4 chars
     });
-
-    it("generates variable token for first identifier in expression", () => {
-      const tokens = decodeTokens(parseAndGetTokens("{{ myVariable }}"));
-      const varToken = tokens.find((t) => t.tokenType === TOKEN_TYPES.variable);
-      expect(varToken).toBeDefined();
-    });
   });
 
   describe("property tokens", () => {

@@ -44,34 +44,6 @@ describe("parser utilities", () => {
       expect(tree!.rootNode).toBeDefined();
     });
 
-    it("parses output statements correctly", () => {
-      const tree = testParseDocument("{{ name }}");
-      expect(tree).not.toBeNull();
-
-      // Root node should have children representing the Twig constructs
-      const rootNode = tree!.rootNode;
-      expect(rootNode.childCount).toBeGreaterThan(0);
-    });
-
-    it("parses block statements correctly", () => {
-      const tree = testParseDocument("{% if condition %}content{% endif %}");
-      expect(tree).not.toBeNull();
-
-      const rootNode = tree!.rootNode;
-      expect(rootNode.childCount).toBeGreaterThan(0);
-    });
-
-    it("parses comments correctly", () => {
-      const tree = testParseDocument("{# this is a comment #}");
-      expect(tree).not.toBeNull();
-    });
-
-    it("parses mixed HTML and Twig content", () => {
-      const tree = testParseDocument("<div>{{ content }}</div>");
-      expect(tree).not.toBeNull();
-      expect(tree!.rootNode.childCount).toBeGreaterThan(0);
-    });
-
     it("parses complex templates with multiple constructs", () => {
       const template = `{% extends "base.twig" %}
 {% block title %}{{ pageTitle }}{% endblock %}

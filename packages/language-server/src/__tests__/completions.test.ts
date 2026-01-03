@@ -179,6 +179,23 @@ describe("getCompletions", () => {
     return completions.map((c) => c.label);
   }
 
+  function getCompletionLabelsWithTree(
+    content: string,
+    position: { line: number; character: number }
+  ): string[] {
+    const doc = createDocument(content);
+    const tree = parse(content);
+    const completions = getCompletions(
+      doc,
+      {
+        textDocument: { uri: doc.uri },
+        position,
+      },
+      tree
+    );
+    return completions.map((c) => c.label);
+  }
+
   describe("block context completions", () => {
     it("returns keywords in block context", () => {
       const content = "{% ";
@@ -354,23 +371,6 @@ describe("getCompletions", () => {
   });
 
   describe("context-aware end keyword completions", () => {
-    function getCompletionLabelsWithTree(
-      content: string,
-      position: { line: number; character: number }
-    ): string[] {
-      const doc = createDocument(content);
-      const tree = parse(content);
-      const completions = getCompletions(
-        doc,
-        {
-          textDocument: { uri: doc.uri },
-          position,
-        },
-        tree
-      );
-      return completions.map((c) => c.label);
-    }
-
     it("shows endif only when inside if block", () => {
       // Inside if block
       const contentInside = "{% if true %}\n  {% ";
@@ -478,23 +478,6 @@ describe("getCompletions", () => {
   });
 
   describe("context-aware else/elseif completions", () => {
-    function getCompletionLabelsWithTree(
-      content: string,
-      position: { line: number; character: number }
-    ): string[] {
-      const doc = createDocument(content);
-      const tree = parse(content);
-      const completions = getCompletions(
-        doc,
-        {
-          textDocument: { uri: doc.uri },
-          position,
-        },
-        tree
-      );
-      return completions.map((c) => c.label);
-    }
-
     it("shows else and elseif inside if block", () => {
       const content = "{% if true %}\n  {% ";
       const labels = getCompletionLabelsWithTree(content, {
