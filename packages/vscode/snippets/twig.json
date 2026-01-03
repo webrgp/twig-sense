@@ -1,0 +1,137 @@
+{
+  "If Block": {
+    "prefix": "if",
+    "body": ["{% if ${1:condition} %}", "\t$0", "{% endif %}"],
+    "description": "Twig if conditional block"
+  },
+  "If/Else Block": {
+    "prefix": "ifelse",
+    "body": ["{% if ${1:condition} %}", "\t$2", "{% else %}", "\t$0", "{% endif %}"],
+    "description": "Twig if/else conditional block"
+  },
+  "If/Elseif/Else Block": {
+    "prefix": "ifelseif",
+    "body": [
+      "{% if ${1:condition} %}",
+      "\t$2",
+      "{% elseif ${3:condition} %}",
+      "\t$4",
+      "{% else %}",
+      "\t$0",
+      "{% endif %}"
+    ],
+    "description": "Twig if/elseif/else conditional block"
+  },
+  "For Loop": {
+    "prefix": "for",
+    "body": ["{% for ${1:item} in ${2:items} %}", "\t$0", "{% endfor %}"],
+    "description": "Twig for loop"
+  },
+  "For/Else Loop": {
+    "prefix": "forelse",
+    "body": ["{% for ${1:item} in ${2:items} %}", "\t$3", "{% else %}", "\t$0", "{% endfor %}"],
+    "description": "Twig for loop with else for empty collections"
+  },
+  "Extends with Block": {
+    "prefix": "extends",
+    "body": [
+      "{% extends '${1:base.twig}' %}",
+      "",
+      "{% block ${2:content} %}",
+      "\t$0",
+      "{% endblock %}"
+    ],
+    "description": "Twig extends with initial block"
+  },
+  "Block": {
+    "prefix": "block",
+    "body": ["{% block ${1:name} %}", "\t$0", "{% endblock %}"],
+    "description": "Twig block definition"
+  },
+  "Embed": {
+    "prefix": "embed",
+    "body": [
+      "{% embed '${1:template}' %}",
+      "\t{% block ${2:name} %}",
+      "\t\t$0",
+      "\t{% endblock %}",
+      "{% endembed %}"
+    ],
+    "description": "Twig embed with block override"
+  },
+  "Include": {
+    "prefix": "include",
+    "body": ["{% include '${1:template}' %}"],
+    "description": "Twig include statement"
+  },
+  "Include with Variables": {
+    "prefix": "includewith",
+    "body": ["{% include '${1:template}' with { ${2:key}: ${3:value} } %}"],
+    "description": "Twig include with variables"
+  },
+  "Import": {
+    "prefix": "import",
+    "body": ["{% import '${1:template}' as ${2:name} %}"],
+    "description": "Twig import macros"
+  },
+  "From Import": {
+    "prefix": "from",
+    "body": ["{% from '${1:template}' import ${2:macro} %}"],
+    "description": "Twig from import"
+  },
+  "Macro": {
+    "prefix": "macro",
+    "body": ["{% macro ${1:name}(${2:args}) %}", "\t$0", "{% endmacro %}"],
+    "description": "Twig macro definition"
+  },
+  "Set Variable": {
+    "prefix": "set",
+    "body": ["{% set ${1:name} = ${2:value} %}"],
+    "description": "Twig set variable (inline)"
+  },
+  "Set Block": {
+    "prefix": "setblock",
+    "body": ["{% set ${1:name} %}", "\t$0", "{% endset %}"],
+    "description": "Twig set variable (block)"
+  },
+  "Autoescape": {
+    "prefix": "autoescape",
+    "body": ["{% autoescape '${1|html,js,css,url|}' %}", "\t$0", "{% endautoescape %}"],
+    "description": "Twig autoescape block"
+  },
+  "Spaceless": {
+    "prefix": "spaceless",
+    "body": ["{% apply spaceless %}", "\t$0", "{% endapply %}"],
+    "description": "Twig spaceless block (via apply)"
+  },
+  "Verbatim": {
+    "prefix": "verbatim",
+    "body": ["{% verbatim %}", "\t$0", "{% endverbatim %}"],
+    "description": "Twig verbatim block (no parsing)"
+  },
+  "Apply Filter": {
+    "prefix": "apply",
+    "body": ["{% apply ${1:filter} %}", "\t$0", "{% endapply %}"],
+    "description": "Twig apply filter block"
+  },
+  "Cache": {
+    "prefix": "cache",
+    "body": ["{% cache '${1:key}' %}", "\t$0", "{% endcache %}"],
+    "description": "Twig cache block"
+  },
+  "With": {
+    "prefix": "with",
+    "body": ["{% with { ${1:key}: ${2:value} } %}", "\t$0", "{% endwith %}"],
+    "description": "Twig with block for scoped variables"
+  },
+  "Sandbox": {
+    "prefix": "sandbox",
+    "body": ["{% sandbox %}", "\t$0", "{% endsandbox %}"],
+    "description": "Twig sandbox block for untrusted code"
+  },
+  "Do": {
+    "prefix": "do",
+    "body": ["{% do ${1:expression} %}"],
+    "description": "Twig do expression (side effects)"
+  }
+}

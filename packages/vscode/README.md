@@ -18,6 +18,36 @@ Supports Twig 3.15+ inline comments:
 {% endfor %}
 ```
 
+### Code Snippets
+
+Type a prefix and press Tab to insert a snippet. All snippets use natural Twig keywords as prefixes.
+
+| Prefix        | Description                      |
+| ------------- | -------------------------------- |
+| `if`          | If block                         |
+| `ifelse`      | If/else block                    |
+| `ifelseif`    | If/elseif/else block             |
+| `for`         | For loop                         |
+| `forelse`     | For loop with else (empty check) |
+| `extends`     | Extends with initial block       |
+| `block`       | Block definition                 |
+| `embed`       | Embed with block override        |
+| `include`     | Include statement                |
+| `includewith` | Include with variables           |
+| `import`      | Import macros                    |
+| `from`        | From import                      |
+| `macro`       | Macro definition                 |
+| `set`         | Set variable (inline)            |
+| `setblock`    | Set variable (block)             |
+| `autoescape`  | Autoescape block                 |
+| `spaceless`   | Spaceless block (via apply)      |
+| `verbatim`    | Verbatim block (no parsing)      |
+| `apply`       | Apply filter block               |
+| `cache`       | Cache block                      |
+| `with`        | With block (scoped variables)    |
+| `sandbox`     | Sandbox block (untrusted code)   |
+| `do`          | Do expression (side effects)     |
+
 ### Supported File Extensions
 
 - `.twig`

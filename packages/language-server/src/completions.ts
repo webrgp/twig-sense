@@ -34,7 +34,7 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "if",
     kind: CompletionItemKind.Keyword,
-    insertText: "if ${1:condition}",
+    insertText: "if ${1:condition} %}\n\t$0\n{% endif",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "Conditional statement",
     documentation: KEYWORD_DOCS["if"],
@@ -62,7 +62,7 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "for",
     kind: CompletionItemKind.Keyword,
-    insertText: "for ${1:item} in ${2:items}",
+    insertText: "for ${1:item} in ${2:items} %}\n\t$0\n{% endfor",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "For loop",
     documentation: KEYWORD_DOCS["for"],
@@ -76,7 +76,7 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "block",
     kind: CompletionItemKind.Keyword,
-    insertText: "block ${1:name}",
+    insertText: "block ${1:name} %}\n\t$0\n{% endblock",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "Define a block",
     documentation: KEYWORD_DOCS["block"],
@@ -120,7 +120,7 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "macro",
     kind: CompletionItemKind.Keyword,
-    insertText: "macro ${1:name}(${2:args})",
+    insertText: "macro ${1:name}(${2:args}) %}\n\t$0\n{% endmacro",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "Define a macro",
     documentation: KEYWORD_DOCS["macro"],
@@ -158,7 +158,7 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "apply",
     kind: CompletionItemKind.Keyword,
-    insertText: "apply ${1:filter}",
+    insertText: "apply ${1:filter} %}\n\t$0\n{% endapply",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "Apply filter to block",
     documentation: KEYWORD_DOCS["apply"],
@@ -172,7 +172,7 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "autoescape",
     kind: CompletionItemKind.Keyword,
-    insertText: "autoescape '${1|html,js,css,url,html_attr|}'",
+    insertText: "autoescape '${1|html,js,css,url,html_attr|}' %}\n\t$0\n{% endautoescape",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "Auto-escape block",
     documentation: KEYWORD_DOCS["autoescape"],
@@ -186,7 +186,8 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "embed",
     kind: CompletionItemKind.Keyword,
-    insertText: "embed '${1:template}'",
+    insertText:
+      "embed '${1:template}' %}\n\t{% block ${2:name} %}\n\t\t$0\n\t{% endblock %}\n{% endembed",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "Embed a template",
     documentation: KEYWORD_DOCS["embed"],
@@ -206,6 +207,8 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "sandbox",
     kind: CompletionItemKind.Keyword,
+    insertText: "sandbox %}\n\t$0\n{% endsandbox",
+    insertTextFormat: InsertTextFormat.Snippet,
     detail: "Sandbox block",
     documentation: KEYWORD_DOCS["sandbox"],
   },
@@ -226,6 +229,8 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "verbatim",
     kind: CompletionItemKind.Keyword,
+    insertText: "verbatim %}\n\t$0\n{% endverbatim",
+    insertTextFormat: InsertTextFormat.Snippet,
     detail: "Raw output (no parsing)",
     documentation: KEYWORD_DOCS["verbatim"],
   },
@@ -246,7 +251,7 @@ const TWIG_KEYWORDS: CompletionItem[] = [
   {
     label: "cache",
     kind: CompletionItemKind.Keyword,
-    insertText: "cache '${1:key}'",
+    insertText: "cache '${1:key}' %}\n\t$0\n{% endcache",
     insertTextFormat: InsertTextFormat.Snippet,
     detail: "Cache block",
     documentation: KEYWORD_DOCS["cache"],

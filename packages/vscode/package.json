@@ -48,6 +48,12 @@
         "configuration": "./languages/twig.configuration.json"
       }
     ],
+    "snippets": [
+      {
+        "language": "twig",
+        "path": "./snippets/twig.json"
+      }
+    ],
     "grammars": [
       {
         "language": "twig",

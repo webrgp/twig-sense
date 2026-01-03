@@ -338,7 +338,7 @@ describe("getCompletions", () => {
       expect(ifCompletion).toBeDefined();
       expect(ifCompletion!.kind).toBe(CompletionItemKind.Keyword);
       expect(ifCompletion!.detail).toBe("Conditional statement");
-      expect(ifCompletion!.insertText).toBe("if ${1:condition}");
+      expect(ifCompletion!.insertText).toBe("if ${1:condition} %}\n\t$0\n{% endif");
     });
 
     it("filters have correct kind and details", () => {
@@ -367,6 +367,64 @@ describe("getCompletions", () => {
       expect(dumpFunction).toBeDefined();
       expect(dumpFunction!.kind).toBe(CompletionItemKind.Function);
       expect(dumpFunction!.insertText).toBe("dump(${1:variable})");
+    });
+  });
+
+  describe("multi-line LSP snippet completions", () => {
+    it("if completion includes endif closing tag", () => {
+      const content = "{% ";
+      const doc = createDocument(content);
+      const completions = getCompletions(doc, {
+        textDocument: { uri: doc.uri },
+        position: { line: 0, character: 3 },
+      });
+
+      const ifCompletion = completions.find((c) => c.label === "if");
+      expect(ifCompletion).toBeDefined();
+      expect(ifCompletion!.insertText).toContain("{% endif");
+      expect(ifCompletion!.insertText).toContain("\n");
+    });
+
+    it("for completion includes endfor closing tag", () => {
+      const content = "{% ";
+      const doc = createDocument(content);
+      const completions = getCompletions(doc, {
+        textDocument: { uri: doc.uri },
+        position: { line: 0, character: 3 },
+      });
+
+      const forCompletion = completions.find((c) => c.label === "for");
+      expect(forCompletion).toBeDefined();
+      expect(forCompletion!.insertText).toContain("{% endfor");
+      expect(forCompletion!.insertText).toContain("\n");
+    });
+
+    it("block completion includes endblock closing tag", () => {
+      const content = "{% ";
+      const doc = createDocument(content);
+      const completions = getCompletions(doc, {
+        textDocument: { uri: doc.uri },
+        position: { line: 0, character: 3 },
+      });
+
+      const blockCompletion = completions.find((c) => c.label === "block");
+      expect(blockCompletion).toBeDefined();
+      expect(blockCompletion!.insertText).toContain("{% endblock");
+      expect(blockCompletion!.insertText).toContain("\n");
+    });
+
+    it("macro completion includes endmacro closing tag", () => {
+      const content = "{% ";
+      const doc = createDocument(content);
+      const completions = getCompletions(doc, {
+        textDocument: { uri: doc.uri },
+        position: { line: 0, character: 3 },
+      });
+
+      const macroCompletion = completions.find((c) => c.label === "macro");
+      expect(macroCompletion).toBeDefined();
+      expect(macroCompletion!.insertText).toContain("{% endmacro");
+      expect(macroCompletion!.insertText).toContain("\n");
     });
   });
 
