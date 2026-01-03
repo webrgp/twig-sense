@@ -98,3 +98,5 @@
 - [ ] Verify semantic token colors match or complement TextMate colors
 - [ ] Ensure no visual conflicts between TextMate and semantic highlighting
 - [ ] Test disabling semantic tokens to verify TextMate fallback
+- [ ] Verify Phase 1 (grammar) properly generates inline_comment nodes
+- [ ] Confirm semantic tokens from Phase 1 work correctly with TextMate patterns

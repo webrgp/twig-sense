@@ -8,10 +8,17 @@ The language server SHALL validate inline comment usage and warn when closing de
 
 #### Scenario: Same-line delimiter detection
 
-- **WHEN** a document contains an inline comment
-- **AND** the closing delimiter (`}}` or `%}`) appears on the same line after the `#`
+- **WHEN** a document contains an inline comment node
+- **AND** the parent construct's closing delimiter token appears on the same line as the inline comment
 - **THEN** a diagnostic warning is generated
 - **AND** the diagnostic points to the inline comment location
+
+#### Scenario: Token-based delimiter detection
+
+- **WHEN** validating inline comment placement
+- **THEN** the validator checks the actual closing delimiter token from the syntax tree
+- **AND** not text content that resembles delimiters within the comment
+- **AND** uses line numbers from tree-sitter position information
 
 #### Scenario: Diagnostic message content
 
@@ -44,8 +51,17 @@ The language server SHALL validate inline comment usage and warn when closing de
 
 - **WHEN** a string literal contains `}}` or `%}` characters
 - **AND** an inline comment exists in the expression
-- **THEN** the string content is ignored when checking for same-line delimiters
+- **THEN** the validator checks only actual delimiter tokens from syntax tree
+- **AND** string content nodes are not considered as delimiters
 - **AND** no false positive diagnostic is generated
+
+#### Scenario: False positive prevention (comment text)
+
+- **WHEN** inline comment text contains `}}` or `%}` characters
+- **AND** the actual closing delimiter is on a subsequent line
+- **THEN** the comment text is ignored when checking for delimiters
+- **AND** no diagnostic is generated
+- **AND** the inline comment is considered valid
 
 #### Scenario: Configuration check
 

@@ -55,3 +55,21 @@ The Tree-sitter grammar SHALL recognize inline comments (introduced in Twig 3.15
 - **THEN** the comment captures text up to but not including the newline
 - **AND** subsequent lines are parsed normally
 - **AND** closing delimiters on following lines are recognized
+
+#### Scenario: Nested expression with inline comment
+
+- **WHEN** a parenthesized or bracketed expression contains inline comments
+- **THEN** the inline comments are parsed within their containing expression
+- **AND** the nested structure remains valid
+
+#### Scenario: Complex expression with inline comments
+
+- **WHEN** an expression contains filters, function calls, and inline comments
+- **THEN** all elements are parsed correctly
+- **AND** inline comment nodes appear in appropriate positions
+
+#### Scenario: Real-world map literal usage
+
+- **WHEN** a map literal contains inline comments after each value (Twig docs pattern)
+- **THEN** each inline comment is parsed as separate inline_comment node
+- **AND** the map structure and filter application remain valid

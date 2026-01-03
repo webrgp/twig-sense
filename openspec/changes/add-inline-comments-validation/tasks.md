@@ -12,11 +12,13 @@
 
 - [ ] Traverse syntax tree to find all `inline_comment` nodes
 - [ ] For each inline_comment node, get its parent node (output_statement or statement_block)
-- [ ] Check if parent node's end position is on the same line as inline_comment
+- [ ] Get the parent's closing delimiter token (last child: `}}`, `-}}`, `%}`, or `-%}`)
+- [ ] Check if closing delimiter token's start position is on same line as inline_comment start
+- [ ] Use tree-sitter position information (row numbers) for accurate line comparison
 
 ### 1.3 Implement diagnostic generation
 
-- [ ] When same-line closing delimiter detected, create Diagnostic object
+- [ ] When same-line closing delimiter token detected, create Diagnostic object
 - [ ] Set severity to `DiagnosticSeverity.Warning`
 - [ ] Set message: "Inline comment extends to end of line. Move closing delimiter to next line."
 - [ ] Set range to inline_comment node's position
@@ -24,9 +26,10 @@
 
 ### 1.4 Handle edge cases
 
-- [ ] Check that delimiter is actual closing token, not in comment text
-- [ ] Handle expressions spanning multiple lines (only flag if issue exists)
-- [ ] Ignore false positives where `}}` appears in comment text but expression properly closed
+- [ ] Verify delimiter detection uses actual syntax tree tokens, not comment text content
+- [ ] Handle multi-line expressions: only warn if last inline comment and closer on same line
+- [ ] Ignore `}}` or `%}` appearing within inline comment text (not actual delimiter tokens)
+- [ ] Test with whitespace-only content between comment and delimiter on same line
 
 ## Phase 2: Integration with Language Server
 
@@ -69,6 +72,9 @@
 - [ ] Test: Multi-line expression with inline comments, properly closed
 - [ ] Test: String containing `}}` text (not a real closer)
 - [ ] Test: No inline comments present (no validation needed)
+- [ ] Test: Comment text contains `}}` or `%}` but delimiter is on next line (valid)
+- [ ] Test: Whitespace-only between inline comment and next line's delimiter (valid)
+- [ ] Test: Multi-line with intermediate inline comments, all properly spaced (valid)
 
 ### 3.4 Test diagnostic properties
 

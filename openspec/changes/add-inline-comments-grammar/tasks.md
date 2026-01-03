@@ -31,6 +31,14 @@
 - [ ] Add test case: "Inline comment in array/map syntax"
 - [ ] Add test case: "Hash symbol inside string (should not be comment)"
 - [ ] Add test case: "Multiple inline comments on separate lines"
+- [ ] Add test case: "Inline comment doesn't consume newline character"
+- [ ] Add test case: "Code on next line after inline comment parses correctly"
+- [ ] Add test case: "Inline comment inside parenthesized expression"
+- [ ] Add test case: "Inline comment with filter and function calls"
+- [ ] Add test case: "Map literal with inline comments after values (real-world from Twig docs)"
+- [ ] Add test case: "Inline comment after trailing comma in array/map"
+- [ ] Add test case: "Inline comment before closing bracket/brace"
+- [ ] Add test case: "Inline comment after filter pipe on multiline expression"
 
 ### 2.2 Define expected parse trees
 
@@ -68,13 +76,21 @@
 - [ ] Test inline comment node position matches source
 - [ ] Test hash in string does not create inline_comment node
 
-### 4.2 Update semantic token tests
+### 4.2 Update semantic token handler
+
+- [ ] Open `packages/language-server/src/semantic-tokens.ts`
+- [ ] Add case for `inline_comment` in `getTokenType()` function
+- [ ] Map `inline_comment` node type to `TOKEN_TYPES.comment`
+- [ ] Verify it follows same pattern as existing `comment_content` handling
+
+### 4.3 Update semantic token tests
 
 - [ ] Update `packages/language-server/src/__tests__/semantic-tokens.test.ts`
 - [ ] Add test case for inline comment generating comment token type
 - [ ] Verify inline comments inside expressions produce tokens
+- [ ] Test that inline comment tokens have correct position and length
 
-### 4.3 Run all tests
+### 4.4 Run all tests
 
 - [ ] Run `npm test` in language-server package
 - [ ] Verify all existing tests still pass
@@ -90,8 +106,13 @@
 - [ ] Verify no parse errors in language server logs
 - [ ] Check that syntax tree includes inline_comment nodes (via debug logging if needed)
 
-### 5.2 Documentation
+### 5.2 Verify newline handling
+
+- [ ] Test that `token(seq('#', /.*/))` stops at line boundary
+- [ ] Verify inline comments don't consume newline characters
+- [ ] Confirm multiline expressions with inline comments parse all lines correctly
+
+### 5.3 Documentation
 
 - [ ] Update corpus/comments.txt with inline comment examples
-- [ ] Add inline comment test fixtures to `packages/vscode/test/fixtures/`
-- [ ] Document inline comment support in NOTES.md if applicable
+- [ ] Add inline comment test fixtures to `packages/vscode/test/fixtures/`- [ ] Include real-world examples from Twig docs (map literals with comments)- [ ] Document inline comment support in NOTES.md if applicable
