@@ -1,0 +1,36 @@
+{# Example of Twig 3.15 inline comments #}
+
+<html>
+<head>
+    <title>{{ title # page title variable }}</title>
+</head>
+<body>
+    <nav>
+        {% for item in menu # iterate over menu items
+        %}
+            <a href="{{ item.url }}">{{ item.label }}</a>
+        {% endfor %}
+    </nav>
+
+    <main>
+        {{
+            # This is an inline comment on its own line
+            content|raw
+        }}
+    </main>
+
+    {% include 'template.html' with {
+        foo: bar, # configuration option
+        baz: qux, # another option
+    } %}
+
+    {{ user.name|capitalize # capitalize the user's name
+    }}
+
+    {{ [
+        1, # first item
+        2, # second item
+        3, # third item
+    ]|join(', ') }}
+</body>
+</html>

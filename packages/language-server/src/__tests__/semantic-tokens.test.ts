@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll } from "vitest";
 import * as path from "path";
+import { beforeAll, describe, expect, it } from "vitest";
 import Parser from "web-tree-sitter";
 import { generateSemanticTokens } from "../semantic-tokens";
 
@@ -177,6 +177,59 @@ describe("generateSemanticTokens", () => {
       const tokens = decodeTokens(parseAndGetTokens("{# this is a comment #}"));
       const commentToken = tokens.find((t) => t.tokenType === TOKEN_TYPES.comment);
       expect(commentToken).toBeDefined();
+    });
+
+    it("generates comment token for inline comments", () => {
+      const template = `{{ variable # inline comment
+}}`;
+      const tokens = decodeTokens(parseAndGetTokens(template));
+      const commentTokens = tokens.filter((t) => t.tokenType === TOKEN_TYPES.comment);
+      expect(commentTokens.length).toBe(1);
+    });
+
+    it("generates comment token for inline comment on own line", () => {
+      const template = `{{
+  # this is an inline comment
+  variable
+}}`;
+      const tokens = decodeTokens(parseAndGetTokens(template));
+      const commentTokens = tokens.filter((t) => t.tokenType === TOKEN_TYPES.comment);
+      expect(commentTokens.length).toBe(1);
+    });
+
+    it("generates multiple comment tokens for multiple inline comments", () => {
+      const template = `{{
+  # first comment
+  variable
+  # second comment
+}}`;
+      const tokens = decodeTokens(parseAndGetTokens(template));
+      const commentTokens = tokens.filter((t) => t.tokenType === TOKEN_TYPES.comment);
+      expect(commentTokens.length).toBe(2);
+    });
+
+    it("inline comment has correct position", () => {
+      const template = `{{ var # comment
+}}`;
+      const tokens = decodeTokens(parseAndGetTokens(template));
+      const commentToken = tokens.find((t) => t.tokenType === TOKEN_TYPES.comment);
+      expect(commentToken).toBeDefined();
+      expect(commentToken!.line).toBe(0);
+      expect(commentToken!.startChar).toBe(7); // "{{ var " = 7 chars
+    });
+
+    it("does not create comment token for hash in string", () => {
+      const tokens = decodeTokens(parseAndGetTokens('{{ "hello#world" }}'));
+      const commentTokens = tokens.filter((t) => t.tokenType === TOKEN_TYPES.comment);
+      expect(commentTokens.length).toBe(0);
+    });
+
+    it("generates comment token for inline comment in statement", () => {
+      const template = `{% set value = 42 # setting value
+%}`;
+      const tokens = decodeTokens(parseAndGetTokens(template));
+      const commentTokens = tokens.filter((t) => t.tokenType === TOKEN_TYPES.comment);
+      expect(commentTokens.length).toBe(1);
     });
   });
 

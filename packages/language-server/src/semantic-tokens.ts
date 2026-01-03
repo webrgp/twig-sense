@@ -1,4 +1,4 @@
-import { Tree, SyntaxNode } from "web-tree-sitter";
+import { SyntaxNode, Tree } from "web-tree-sitter";
 
 // Token types must match the legend in server.ts
 const TOKEN_TYPES = {
@@ -21,11 +21,7 @@ interface Token {
 }
 
 // Valid Twig construct types that contain tokenizable content
-const TWIG_CONSTRUCTS = new Set([
-  "output_statement",
-  "statement_block",
-  "comment",
-]);
+const TWIG_CONSTRUCTS = new Set(["output_statement", "statement_block", "comment"]);
 
 export function generateSemanticTokens(tree: Tree): number[] {
   const tokens: Token[] = [];
@@ -43,11 +39,7 @@ export function generateSemanticTokens(tree: Tree): number[] {
   return encodeTokens(tokens);
 }
 
-function collectTokens(
-  node: SyntaxNode,
-  tokens: Token[],
-  insideTwigConstruct: boolean
-): void {
+function collectTokens(node: SyntaxNode, tokens: Token[], insideTwigConstruct: boolean): void {
   // Check if we're entering a Twig construct
   const isThisTwigConstruct = TWIG_CONSTRUCTS.has(node.type);
   const inTwig = insideTwigConstruct || isThisTwigConstruct;
@@ -89,6 +81,7 @@ function getTokenType(node: SyntaxNode): number | null {
       return TOKEN_TYPES.number;
 
     case "comment_content":
+    case "inline_comment":
       return TOKEN_TYPES.comment;
 
     case "identifier":
@@ -130,13 +123,7 @@ function encodeTokens(tokens: Token[]): number[] {
     // Delta start character (reset to absolute if on new line)
     const deltaStartChar = deltaLine === 0 ? token.startChar - prevChar : token.startChar;
 
-    data.push(
-      deltaLine,
-      deltaStartChar,
-      token.length,
-      token.tokenType,
-      token.tokenModifiers
-    );
+    data.push(deltaLine, deltaStartChar, token.length, token.tokenType, token.tokenModifiers);
 
     prevLine = token.line;
     prevChar = token.startChar;

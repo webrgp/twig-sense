@@ -10,32 +10,22 @@ module.exports = grammar({
   rules: {
     source_file: ($) => repeat($._node),
 
-    _node: ($) =>
-      choice($.output_statement, $.statement_block, $.comment, $.raw_content),
+    _node: ($) => choice($.output_statement, $.statement_block, $.comment, $.raw_content),
 
     // {{ expression }}
     output_statement: ($) =>
-      seq(
-        choice("{{", "{{-"),
-        optional($._expression_content),
-        choice("}}", "-}}")
-      ),
+      seq(choice("{{", "{{-"), optional($._expression_content), choice("}}", "-}}")),
 
     // {% tag %}
     statement_block: ($) =>
-      seq(
-        choice("{%", "{%-"),
-        optional($._statement_content),
-        choice("%}", "-%}")
-      ),
+      seq(choice("{%", "{%-"), optional($._statement_content), choice("%}", "-%}")),
 
     // {# comment #}
     comment: ($) => seq("{#", optional($.comment_content), "#}"),
 
     comment_content: ($) => /[^#]+/,
 
-    _statement_content: ($) =>
-      seq($.keyword, optional($._expression_content)),
+    _statement_content: ($) => seq($.keyword, optional($._expression_content)),
 
     keyword: ($) =>
       choice(
@@ -79,6 +69,7 @@ module.exports = grammar({
     _expression_content: ($) =>
       repeat1(
         choice(
+          $.inline_comment,
           $.identifier,
           $.property_access,
           $.filter,
@@ -90,14 +81,18 @@ module.exports = grammar({
         )
       ),
 
+    // Inline comment: # followed by text until end of line or closing delimiter (Twig 3.15+)
+    // Stops before }} or %} to allow closing delimiters on same line
+    // Pattern matches: # then any non-}%\n chars, optionally followed by single } or % (not }}) and more non-}%\n
+    inline_comment: ($) => token(seq("#", /[^}%\n]*([}%][^}%\n]+)*/)),
+
     identifier: ($) => /[a-zA-Z_][a-zA-Z0-9_]*/,
 
     property_access: ($) => seq(".", $.identifier),
 
     filter: ($) => seq("|", $.identifier),
 
-    string: ($) =>
-      choice(seq('"', optional(/[^"]*/), '"'), seq("'", optional(/[^']*/), "'")),
+    string: ($) => choice(seq('"', optional(/[^"]*/), '"'), seq("'", optional(/[^']*/), "'")),
 
     number: ($) => /\d+(\.\d+)?/,
 

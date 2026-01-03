@@ -1,0 +1,300 @@
+================================================================================
+Inline comment on own line in output
+================================================================================
+
+{{
+  # this is a comment
+  variable
+}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (inline_comment)
+    (identifier)))
+
+================================================================================
+Inline comment after expression in output
+================================================================================
+
+{{ variable # comment after expression
+}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (identifier)
+    (inline_comment)))
+
+================================================================================
+Multiple inline comments in expression
+================================================================================
+
+{{
+  # first comment
+  variable
+  # second comment
+}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (inline_comment)
+    (identifier)
+    (inline_comment)))
+
+================================================================================
+Inline comment in statement block
+================================================================================
+
+{% set value = 42 # setting the value
+%}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (statement_block
+    (keyword)
+    (identifier)
+    (operator)
+    (number)
+    (inline_comment)))
+
+================================================================================
+Inline comment in array syntax
+================================================================================
+
+{{ [1, 2, # comment in array
+    3] }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (brackets
+      (number)
+      (operator)
+      (number)
+      (operator)
+      (inline_comment)
+      (number))))
+
+================================================================================
+Hash symbol inside string should not be comment
+================================================================================
+
+{{ "hello#world" }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (string)))
+
+================================================================================
+Hash symbol inside single quoted string should not be comment
+================================================================================
+
+{{ 'color:#fff' }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (string)))
+
+================================================================================
+Multiple inline comments on separate lines
+================================================================================
+
+{{
+  # line one
+  # line two
+  # line three
+}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (inline_comment)
+    (inline_comment)
+    (inline_comment)))
+
+================================================================================
+Code on next line after inline comment parses correctly
+================================================================================
+
+{{
+  value # comment here
+  .property
+}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (identifier)
+    (inline_comment)
+    (property_access
+      (identifier))))
+
+================================================================================
+Inline comment inside parenthesized expression
+================================================================================
+
+{{ (value # inside parens
+   ) }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (parenthesized
+      (identifier)
+      (inline_comment))))
+
+================================================================================
+Inline comment with filter and function calls
+================================================================================
+
+{{ name|upper # applying uppercase filter
+}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (identifier)
+    (filter
+      (identifier))
+    (inline_comment)))
+
+================================================================================
+Map literal with inline comments after values (real-world from Twig docs)
+================================================================================
+
+{% include 'template.html' with {
+    foo: bar, # this is a comment
+    baz: qux, # another comment
+} %}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (statement_block
+    (keyword)
+    (string)
+    (keyword)
+    (identifier)
+    (operator)
+    (identifier)
+    (operator)
+    (inline_comment)
+    (identifier)
+    (operator)
+    (identifier)
+    (operator)
+    (inline_comment)
+    (identifier)))
+
+================================================================================
+Inline comment after trailing comma in array
+================================================================================
+
+{{ [1, 2, # trailing comment
+] }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (brackets
+      (number)
+      (operator)
+      (number)
+      (operator)
+      (inline_comment))))
+
+================================================================================
+Inline comment before closing bracket
+================================================================================
+
+{{ [1, 2
+    # comment before close
+] }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (brackets
+      (number)
+      (operator)
+      (number)
+      (inline_comment))))
+
+================================================================================
+Inline comment after filter pipe on multiline expression
+================================================================================
+
+{{ variable
+   |filter # filter comment
+   |another }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (identifier)
+    (filter
+      (identifier))
+    (inline_comment)
+    (filter
+      (identifier))))
+
+================================================================================
+Inline comment on same line as closing output delimiter
+================================================================================
+
+{{ title # page title variable }}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (identifier)
+    (inline_comment)))
+
+================================================================================
+Inline comment on same line as closing statement delimiter
+================================================================================
+
+{% set x = 1 # initialize x %}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (statement_block
+    (keyword)
+    (identifier)
+    (operator)
+    (number)
+    (inline_comment)))
+
+================================================================================
+Inline comment with closing brace in comment text
+================================================================================
+
+{{ value # comment with } inside
+}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (output_statement
+    (identifier)
+    (inline_comment)))
