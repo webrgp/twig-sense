@@ -23,3 +23,4 @@ New contributors have no clear entry point to understand the architecture or pat
 - Affected code:
   - New: `docs/ARCHITECTURE.md`
   - New: `CONTRIBUTING.md`
+  - Modified: `README.md` (move development content to CONTRIBUTING.md, add link)
