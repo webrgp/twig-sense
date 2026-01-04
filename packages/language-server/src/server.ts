@@ -13,6 +13,7 @@ import { getCompletions } from "./completions";
 import { initializeParser, isParserReady, parseDocument, parseDocumentIncremental } from "./parser";
 import { generateSemanticTokens } from "./semantic-tokens";
 import { treeCache } from "./tree-cache";
+import { mergeWithDefaults, TwigSenseConfig } from "./types";
 import { validateInlineComments } from "./validators/inline-comments";
 
 const tokenTypes = [
@@ -36,10 +37,16 @@ const legend: SemanticTokensLegend = {
 const documents: Map<string, TextDocument> = new Map();
 
 export function startServer(connection: Connection): void {
+  // Helper function to get typed configuration
+  async function getConfig(): Promise<TwigSenseConfig> {
+    const rawConfig = await connection.workspace.getConfiguration("twig-sense");
+    return mergeWithDefaults(rawConfig);
+  }
+
   // Helper function to validate document and publish diagnostics
   async function validateDocument(uri: string): Promise<void> {
-    const config = await connection.workspace.getConfiguration("twig-sense");
-    if (config.diagnostics?.enabled === false) {
+    const config = await getConfig();
+    if (!config.diagnostics.enabled) {
       connection.sendDiagnostics({ uri, diagnostics: [] });
       return;
     }
@@ -53,7 +60,7 @@ export function startServer(connection: Connection): void {
     const diagnostics: Diagnostic[] = [];
 
     // Validate inline comments
-    if (config.diagnostics?.inlineComments !== false) {
+    if (config.diagnostics.inlineComments) {
       diagnostics.push(...validateInlineComments(tree));
     }
 
@@ -165,8 +172,8 @@ export function startServer(connection: Connection): void {
     }
 
     // Check if semantic tokens are enabled via configuration
-    const config = await connection.workspace.getConfiguration("twig-sense");
-    if (config.semanticTokens?.enabled === false) {
+    const config = await getConfig();
+    if (!config.semanticTokens.enabled) {
       return { data: [] };
     }
 
