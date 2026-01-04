@@ -1,25 +1,10 @@
-import * as path from "path";
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { DiagnosticSeverity } from "vscode-languageserver/node";
-import Parser from "web-tree-sitter";
 import { validateInlineComments } from "../validators/inline-comments";
-
-let parser: Parser;
-
-beforeAll(async () => {
-  const wasmPath = path.join(__dirname, "../../dist/tree-sitter.wasm");
-  await Parser.init({
-    locateFile: () => wasmPath,
-  });
-
-  parser = new Parser();
-  const langWasmPath = path.join(__dirname, "../../dist/tree-sitter-twig.wasm");
-  const TwigLang = await Parser.Language.load(langWasmPath);
-  parser.setLanguage(TwigLang);
-});
+import { parseTestDocument } from "./utils";
 
 function parseAndValidate(template: string) {
-  const tree = parser.parse(template);
+  const tree = parseTestDocument(template);
   return validateInlineComments(tree);
 }
 

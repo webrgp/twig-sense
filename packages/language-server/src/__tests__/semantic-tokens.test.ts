@@ -1,7 +1,6 @@
-import * as path from "path";
-import { beforeAll, describe, expect, it } from "vitest";
-import Parser from "web-tree-sitter";
+import { describe, expect, it } from "vitest";
 import { generateSemanticTokens } from "../semantic-tokens";
+import { parseTestDocument } from "./utils";
 
 // Token type indices (must match TOKEN_TYPES in semantic-tokens.ts)
 const TOKEN_TYPES = {
@@ -15,22 +14,8 @@ const TOKEN_TYPES = {
   comment: 7,
 };
 
-let parser: Parser;
-
-beforeAll(async () => {
-  const wasmPath = path.join(__dirname, "../../dist/tree-sitter.wasm");
-  await Parser.init({
-    locateFile: () => wasmPath,
-  });
-
-  parser = new Parser();
-  const langWasmPath = path.join(__dirname, "../../dist/tree-sitter-twig.wasm");
-  const TwigLang = await Parser.Language.load(langWasmPath);
-  parser.setLanguage(TwigLang);
-});
-
 function parseAndGetTokens(template: string): number[] {
-  const tree = parser.parse(template);
+  const tree = parseTestDocument(template);
   return generateSemanticTokens(tree);
 }
 

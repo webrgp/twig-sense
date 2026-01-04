@@ -1,6 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
-import * as path from "path";
-import Parser, { Tree } from "web-tree-sitter";
+import { describe, it, expect } from "vitest";
 import {
   analyzeDocument,
   extractSetVariables,
@@ -10,34 +8,11 @@ import {
   getScopeAtPosition,
   getAvailableVariables,
 } from "../document-analyzer";
-
-let parser: Parser;
-
-async function initTestParser(): Promise<void> {
-  const wasmPath = path.join(__dirname, "../../dist/tree-sitter.wasm");
-  await Parser.init({
-    locateFile: () => wasmPath,
-  });
-
-  parser = new Parser();
-  const langWasmPath = path.join(__dirname, "../../dist/tree-sitter-twig.wasm");
-  const TwigLang = await Parser.Language.load(langWasmPath);
-  parser.setLanguage(TwigLang);
-}
-
-beforeAll(async () => {
-  await initTestParser();
-});
-
-function parse(content: string): Tree {
-  const tree = parser.parse(content);
-  if (!tree) throw new Error("Failed to parse document");
-  return tree;
-}
+import { parseTestDocument } from "./utils";
 
 describe("extractSetVariables", () => {
   it("extracts simple set variable", () => {
-    const tree = parse("{% set username = 'john' %}");
+    const tree = parseTestDocument("{% set username = 'john' %}");
     const variables = extractSetVariables(tree);
 
     expect(variables).toHaveLength(1);
@@ -46,7 +21,7 @@ describe("extractSetVariables", () => {
   });
 
   it("extracts multiple set variables", () => {
-    const tree = parse(`{% set name = 'Alice' %}
+    const tree = parseTestDocument(`{% set name = 'Alice' %}
 {% set age = 30 %}
 {% set city = 'NYC' %}`);
     const variables = extractSetVariables(tree);
@@ -56,7 +31,7 @@ describe("extractSetVariables", () => {
   });
 
   it("extracts set with complex expression", () => {
-    const tree = parse("{% set items = [1, 2, 3]|map(x => x * 2) %}");
+    const tree = parseTestDocument("{% set items = [1, 2, 3]|map(x => x * 2) %}");
     const variables = extractSetVariables(tree);
 
     expect(variables).toHaveLength(1);
@@ -64,7 +39,7 @@ describe("extractSetVariables", () => {
   });
 
   it("returns empty for document without set", () => {
-    const tree = parse("{{ variable }}");
+    const tree = parseTestDocument("{{ variable }}");
     const variables = extractSetVariables(tree);
 
     expect(variables).toHaveLength(0);
@@ -73,7 +48,7 @@ describe("extractSetVariables", () => {
 
 describe("extractForLoops", () => {
   it("extracts simple for loop variable", () => {
-    const tree = parse(`{% for item in items %}
+    const tree = parseTestDocument(`{% for item in items %}
   {{ item }}
 {% endfor %}`);
     const forLoops = extractForLoops(tree);
@@ -84,7 +59,7 @@ describe("extractForLoops", () => {
   });
 
   it("extracts for loop with key, value", () => {
-    const tree = parse(`{% for key, value in items %}
+    const tree = parseTestDocument(`{% for key, value in items %}
   {{ key }}: {{ value }}
 {% endfor %}`);
     const forLoops = extractForLoops(tree);
@@ -95,7 +70,7 @@ describe("extractForLoops", () => {
   });
 
   it("extracts nested for loops", () => {
-    const tree = parse(`{% for category in categories %}
+    const tree = parseTestDocument(`{% for category in categories %}
   {% for item in category.items %}
     {{ item }}
   {% endfor %}
@@ -108,7 +83,7 @@ describe("extractForLoops", () => {
   });
 
   it("returns empty for document without for loops", () => {
-    const tree = parse("{{ variable }}");
+    const tree = parseTestDocument("{{ variable }}");
     const forLoops = extractForLoops(tree);
 
     expect(forLoops).toHaveLength(0);
@@ -117,7 +92,7 @@ describe("extractForLoops", () => {
 
 describe("extractMacros", () => {
   it("extracts macro without parameters", () => {
-    const tree = parse(`{% macro separator() %}
+    const tree = parseTestDocument(`{% macro separator() %}
   <hr />
 {% endmacro %}`);
     const macros = extractMacros(tree);
@@ -128,7 +103,7 @@ describe("extractMacros", () => {
   });
 
   it("extracts macro with parameters", () => {
-    const tree = parse(`{% macro input(name, value, type) %}
+    const tree = parseTestDocument(`{% macro input(name, value, type) %}
   <input type="{{ type }}" name="{{ name }}" value="{{ value }}">
 {% endmacro %}`);
     const macros = extractMacros(tree);
@@ -139,7 +114,7 @@ describe("extractMacros", () => {
   });
 
   it("extracts multiple macros", () => {
-    const tree = parse(`{% macro button(text) %}
+    const tree = parseTestDocument(`{% macro button(text) %}
   <button>{{ text }}</button>
 {% endmacro %}
 
@@ -154,7 +129,7 @@ describe("extractMacros", () => {
   });
 
   it("returns empty for document without macros", () => {
-    const tree = parse("{{ variable }}");
+    const tree = parseTestDocument("{{ variable }}");
     const macros = extractMacros(tree);
 
     expect(macros).toHaveLength(0);
@@ -163,7 +138,7 @@ describe("extractMacros", () => {
 
 describe("extractBlocks", () => {
   it("extracts simple block", () => {
-    const tree = parse(`{% block header %}
+    const tree = parseTestDocument(`{% block header %}
   <header>Header content</header>
 {% endblock %}`);
     const blocks = extractBlocks(tree);
@@ -173,7 +148,7 @@ describe("extractBlocks", () => {
   });
 
   it("extracts multiple blocks", () => {
-    const tree = parse(`{% block header %}
+    const tree = parseTestDocument(`{% block header %}
   Header
 {% endblock %}
 
@@ -191,7 +166,7 @@ describe("extractBlocks", () => {
   });
 
   it("extracts nested blocks", () => {
-    const tree = parse(`{% block content %}
+    const tree = parseTestDocument(`{% block content %}
   {% block sidebar %}
     Sidebar
   {% endblock %}
@@ -204,7 +179,7 @@ describe("extractBlocks", () => {
   });
 
   it("returns empty for document without blocks", () => {
-    const tree = parse("{{ variable }}");
+    const tree = parseTestDocument("{{ variable }}");
     const blocks = extractBlocks(tree);
 
     expect(blocks).toHaveLength(0);
@@ -213,7 +188,7 @@ describe("extractBlocks", () => {
 
 describe("getScopeAtPosition", () => {
   it("detects position inside for loop", () => {
-    const tree = parse(`{% for item in items %}
+    const tree = parseTestDocument(`{% for item in items %}
   {{ item }}
 {% endfor %}`);
     const scope = getScopeAtPosition(tree, 1, 5);
@@ -224,7 +199,7 @@ describe("getScopeAtPosition", () => {
   });
 
   it("detects position outside for loop", () => {
-    const tree = parse(`{% for item in items %}
+    const tree = parseTestDocument(`{% for item in items %}
 {% endfor %}
 {{ variable }}`);
     const scope = getScopeAtPosition(tree, 2, 5);
@@ -234,7 +209,7 @@ describe("getScopeAtPosition", () => {
   });
 
   it("detects position inside block", () => {
-    const tree = parse(`{% block content %}
+    const tree = parseTestDocument(`{% block content %}
   {{ data }}
 {% endblock %}`);
     const scope = getScopeAtPosition(tree, 1, 5);
@@ -243,7 +218,7 @@ describe("getScopeAtPosition", () => {
   });
 
   it("detects position outside block", () => {
-    const tree = parse(`{% block content %}
+    const tree = parseTestDocument(`{% block content %}
 {% endblock %}
 {{ variable }}`);
     const scope = getScopeAtPosition(tree, 2, 5);
@@ -254,7 +229,7 @@ describe("getScopeAtPosition", () => {
 
 describe("getAvailableVariables", () => {
   it("returns set variables defined before position", () => {
-    const tree = parse(`{% set name = 'Alice' %}
+    const tree = parseTestDocument(`{% set name = 'Alice' %}
 {% set age = 30 %}
 {{ name }}`);
     const variables = getAvailableVariables(tree, 2, 5);
@@ -264,7 +239,7 @@ describe("getAvailableVariables", () => {
   });
 
   it("does not return variables defined after position", () => {
-    const tree = parse(`{{ name }}
+    const tree = parseTestDocument(`{{ name }}
 {% set name = 'Alice' %}`);
     const variables = getAvailableVariables(tree, 0, 5);
 
@@ -272,7 +247,7 @@ describe("getAvailableVariables", () => {
   });
 
   it("includes for loop variable when inside loop", () => {
-    const tree = parse(`{% for item in items %}
+    const tree = parseTestDocument(`{% for item in items %}
   {{ item }}
 {% endfor %}`);
     const variables = getAvailableVariables(tree, 1, 5);
@@ -281,7 +256,7 @@ describe("getAvailableVariables", () => {
   });
 
   it("does not include for loop variable when outside loop", () => {
-    const tree = parse(`{% for item in items %}
+    const tree = parseTestDocument(`{% for item in items %}
 {% endfor %}
 {{ item }}`);
     const variables = getAvailableVariables(tree, 2, 5);
@@ -292,7 +267,7 @@ describe("getAvailableVariables", () => {
 
 describe("analyzeDocument", () => {
   it("returns complete analysis of document", () => {
-    const tree = parse(`{% set title = 'Hello' %}
+    const tree = parseTestDocument(`{% set title = 'Hello' %}
 {% macro greeting(name) %}
   Hello, {{ name }}!
 {% endmacro %}

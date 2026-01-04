@@ -1,43 +1,13 @@
-import { describe, it, expect, beforeAll } from "vitest";
-import * as path from "path";
-import Parser, { Tree } from "web-tree-sitter";
-import { TextDocument } from "vscode-languageserver-textdocument";
+import { describe, it, expect } from "vitest";
 import { CompletionItemKind } from "vscode-languageserver/node";
 import { detectContext, getCompletions } from "../completions";
-
-let parser: Parser;
-
-async function initTestParser(): Promise<void> {
-  const wasmPath = path.join(__dirname, "../../dist/tree-sitter.wasm");
-  await Parser.init({
-    locateFile: () => wasmPath,
-  });
-
-  parser = new Parser();
-  const langWasmPath = path.join(__dirname, "../../dist/tree-sitter-twig.wasm");
-  const TwigLang = await Parser.Language.load(langWasmPath);
-  parser.setLanguage(TwigLang);
-}
-
-function parse(content: string): Tree {
-  const tree = parser.parse(content);
-  if (!tree) throw new Error("Failed to parse document");
-  return tree;
-}
-
-beforeAll(async () => {
-  await initTestParser();
-});
-
-function createDocument(content: string): TextDocument {
-  return TextDocument.create("file:///test.twig", "twig", 1, content);
-}
+import { createTestDocument, parseTestDocument } from "./utils";
 
 describe("detectContext", () => {
   describe("output context", () => {
     it('returns "output" when cursor is inside {{ }}', () => {
       const content = "{{ variable }}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position after "{{ "
       const position = { line: 0, character: 3 };
       expect(detectContext(doc, position)).toBe("output");
@@ -45,14 +15,14 @@ describe("detectContext", () => {
 
     it('returns "output" when cursor is after {{ with no closing', () => {
       const content = "{{ var";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 6 };
       expect(detectContext(doc, position)).toBe("output");
     });
 
     it('returns "output" with multiline content', () => {
       const content = "{{ \n  variable\n}}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position on line 1, middle of "variable"
       const position = { line: 1, character: 4 };
       expect(detectContext(doc, position)).toBe("output");
@@ -62,7 +32,7 @@ describe("detectContext", () => {
   describe("block context", () => {
     it('returns "block" when cursor is inside {% %}', () => {
       const content = "{% if condition %}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position after "{% "
       const position = { line: 0, character: 3 };
       expect(detectContext(doc, position)).toBe("block");
@@ -70,14 +40,14 @@ describe("detectContext", () => {
 
     it('returns "block" when cursor is after {% with no closing', () => {
       const content = "{% for item";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 11 };
       expect(detectContext(doc, position)).toBe("block");
     });
 
     it('returns "block" for various tag keywords', () => {
       const content = "{% extends 'base.twig' %}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 12 };
       expect(detectContext(doc, position)).toBe("block");
     });
@@ -86,7 +56,7 @@ describe("detectContext", () => {
   describe("filter context", () => {
     it('returns "filter" when cursor is after pipe in output', () => {
       const content = "{{ name|upper }}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position after "|"
       const position = { line: 0, character: 8 };
       expect(detectContext(doc, position)).toBe("filter");
@@ -94,7 +64,7 @@ describe("detectContext", () => {
 
     it('returns "filter" when cursor is after pipe with partial filter name', () => {
       const content = "{{ value|da }}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position after "da" (partial filter name)
       const position = { line: 0, character: 11 };
       expect(detectContext(doc, position)).toBe("filter");
@@ -102,7 +72,7 @@ describe("detectContext", () => {
 
     it('returns "filter" when pipe is in block context', () => {
       const content = "{% set x = value|upper %}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position after "|"
       const position = { line: 0, character: 17 };
       expect(detectContext(doc, position)).toBe("filter");
@@ -110,7 +80,7 @@ describe("detectContext", () => {
 
     it('does not return "filter" if pipe is outside Twig delimiters', () => {
       const content = "text | more text";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 6 };
       expect(detectContext(doc, position)).toBe("none");
     });
@@ -119,14 +89,14 @@ describe("detectContext", () => {
   describe("none context", () => {
     it('returns "none" when cursor is in plain HTML', () => {
       const content = "<div>content</div>";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 5 };
       expect(detectContext(doc, position)).toBe("none");
     });
 
     it('returns "none" after closed output tag', () => {
       const content = "{{ variable }} more text";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position after the closing }}
       const position = { line: 0, character: 18 };
       expect(detectContext(doc, position)).toBe("none");
@@ -134,7 +104,7 @@ describe("detectContext", () => {
 
     it('returns "none" after closed block tag', () => {
       const content = "{% endif %} text";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 14 };
       expect(detectContext(doc, position)).toBe("none");
     });
@@ -142,7 +112,7 @@ describe("detectContext", () => {
     it('returns "none" inside Twig comments', () => {
       // Note: Comments are not output or block context
       const content = "{# comment #}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 5 };
       expect(detectContext(doc, position)).toBe("none");
     });
@@ -151,7 +121,7 @@ describe("detectContext", () => {
   describe("nested scenarios", () => {
     it("handles multiple Twig blocks correctly", () => {
       const content = "{{ first }} text {% if true %}";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       // Position inside the {% if %}
       const position = { line: 0, character: 25 };
       expect(detectContext(doc, position)).toBe("block");
@@ -159,7 +129,7 @@ describe("detectContext", () => {
 
     it("handles filter after previous closed expression", () => {
       const content = "{{ done }} {{ value|";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const position = { line: 0, character: 20 };
       expect(detectContext(doc, position)).toBe("filter");
     });
@@ -171,7 +141,7 @@ describe("getCompletions", () => {
     content: string,
     position: { line: number; character: number }
   ): string[] {
-    const doc = createDocument(content);
+    const doc = createTestDocument(content);
     const completions = getCompletions(doc, {
       textDocument: { uri: doc.uri },
       position,
@@ -183,8 +153,8 @@ describe("getCompletions", () => {
     content: string,
     position: { line: number; character: number }
   ): string[] {
-    const doc = createDocument(content);
-    const tree = parse(content);
+    const doc = createTestDocument(content);
+    const tree = parseTestDocument(content);
     const completions = getCompletions(
       doc,
       {
@@ -221,7 +191,7 @@ describe("getCompletions", () => {
 
     it("includes both keywords and functions", () => {
       const content = "{% ";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 3 },
@@ -328,7 +298,7 @@ describe("getCompletions", () => {
   describe("completion item properties", () => {
     it("keywords have correct kind and details", () => {
       const content = "{% ";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 3 },
@@ -343,7 +313,7 @@ describe("getCompletions", () => {
 
     it("filters have correct kind and details", () => {
       const content = "{{ value|";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 9 },
@@ -357,7 +327,7 @@ describe("getCompletions", () => {
 
     it("functions have correct kind and snippet insertText", () => {
       const content = "{{ ";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 3 },
@@ -373,7 +343,7 @@ describe("getCompletions", () => {
   describe("multi-line LSP snippet completions", () => {
     it("if completion includes endif closing tag", () => {
       const content = "{% ";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 3 },
@@ -387,7 +357,7 @@ describe("getCompletions", () => {
 
     it("for completion includes endfor closing tag", () => {
       const content = "{% ";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 3 },
@@ -401,7 +371,7 @@ describe("getCompletions", () => {
 
     it("block completion includes endblock closing tag", () => {
       const content = "{% ";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 3 },
@@ -415,7 +385,7 @@ describe("getCompletions", () => {
 
     it("macro completion includes endmacro closing tag", () => {
       const content = "{% ";
-      const doc = createDocument(content);
+      const doc = createTestDocument(content);
       const completions = getCompletions(doc, {
         textDocument: { uri: doc.uri },
         position: { line: 0, character: 3 },
