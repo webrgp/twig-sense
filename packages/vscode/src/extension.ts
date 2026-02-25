@@ -1,8 +1,5 @@
 import * as path from "path";
-import {
-  ExtensionContext,
-  workspace,
-} from "vscode";
+import { ExtensionContext, workspace } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
@@ -13,9 +10,7 @@ import {
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  const serverModule = context.asAbsolutePath(
-    path.join("..", "language-server", "dist", "index.js")
-  );
+  const serverModule = context.asAbsolutePath(path.join("dist", "server", "index.js"));
 
   const debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
 
