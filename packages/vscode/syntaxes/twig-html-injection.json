@@ -1,13 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Twig HTML Injection",
-  "scopeName": "twig.injection.html",
+  "scopeName": "source.twig.injection-html",
   "injectionSelector": "L:text.html -text.html.twig",
-  "patterns": [
-    { "include": "#comment" },
-    { "include": "#output" },
-    { "include": "#statement" }
-  ],
+  "patterns": [{ "include": "#comment" }, { "include": "#output" }, { "include": "#statement" }],
   "repository": {
     "comment": {
       "name": "comment.block.twig",
@@ -39,10 +35,7 @@
       "endCaptures": {
         "0": { "name": "punctuation.section.embedded.end.twig" }
       },
-      "patterns": [
-        { "include": "#keyword" },
-        { "include": "#expression" }
-      ]
+      "patterns": [{ "include": "#keyword" }, { "include": "#expression" }]
     },
     "keyword": {
       "match": "\\b(if|else|elseif|endif|for|endfor|in|block|endblock|extends|include|set|endset|macro|endmacro|import|from|as|with|apply|endapply|autoescape|endautoescape|embed|endembed|flush|sandbox|endsandbox|use|verbatim|endverbatim|do|cache|endcache|deprecated)\\b",

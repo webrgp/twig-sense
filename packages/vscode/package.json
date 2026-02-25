@@ -70,7 +70,7 @@
         }
       },
       {
-        "scopeName": "twig.injection.html",
+        "scopeName": "source.twig.injection-html",
         "path": "./syntaxes/twig-html-injection.json",
         "injectTo": [
           "text.html.basic",
