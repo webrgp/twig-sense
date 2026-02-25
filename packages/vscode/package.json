@@ -7,8 +7,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/twig-sense/twig-sense"
+    "url": "https://github.com/webrgp/twig-sense",
+    "directory": "packages/vscode"
   },
+  "bugs": {
+    "url": "https://github.com/webrgp/twig-sense/issues"
+  },
+  "homepage": "https://github.com/webrgp/twig-sense#readme",
   "engines": {
     "vscode": "^1.100.0"
   },

@@ -13,7 +13,7 @@ Thank you for your interest in contributing to Twig Sense! This guide will help 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/twig-sense.git
+git clone https://github.com/webrgp/twig-sense.git
 cd twig-sense
 
 # Install dependencies

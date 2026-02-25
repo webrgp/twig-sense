@@ -5,9 +5,7 @@
       "camelcase": "TwigSenseTwig",
       "scope": "source.twig",
       "path": ".",
-      "file-types": [
-        "twig"
-      ],
+      "file-types": ["twig"],
       "injection-regex": "twig"
     }
   ],
@@ -16,7 +14,7 @@
     "license": "MIT",
     "description": "Tree-sitter grammar for Twig templates",
     "links": {
-      "repository": "https://github.com/tree-sitter/tree-sitter-@twig-sense/twig"
+      "repository": "https://github.com/webrgp/twig-sense"
     }
   },
   "bindings": {

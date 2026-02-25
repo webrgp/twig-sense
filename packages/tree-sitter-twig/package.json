@@ -2,6 +2,15 @@
   "name": "@twig-sense/tree-sitter-twig",
   "version": "0.1.0",
   "description": "Tree-sitter grammar for Twig templates",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webrgp/twig-sense",
+    "directory": "packages/tree-sitter-twig"
+  },
+  "bugs": {
+    "url": "https://github.com/webrgp/twig-sense/issues"
+  },
+  "homepage": "https://github.com/webrgp/twig-sense#readme",
   "main": "bindings/node",
   "scripts": {
     "build": "tree-sitter generate && tree-sitter build --wasm",

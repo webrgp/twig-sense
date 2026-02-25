@@ -2,6 +2,15 @@
   "name": "@twig-sense/language-server",
   "version": "0.1.0",
   "description": "Language server for Twig templates",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webrgp/twig-sense",
+    "directory": "packages/language-server"
+  },
+  "bugs": {
+    "url": "https://github.com/webrgp/twig-sense/issues"
+  },
+  "homepage": "https://github.com/webrgp/twig-sense#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
