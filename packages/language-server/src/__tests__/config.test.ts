@@ -7,6 +7,7 @@ describe("TwigSenseConfig", () => {
       expect(DEFAULT_CONFIG.semanticTokens.enabled).toBe(true);
       expect(DEFAULT_CONFIG.diagnostics.enabled).toBe(true);
       expect(DEFAULT_CONFIG.diagnostics.inlineComments).toBe(true);
+      expect(DEFAULT_CONFIG.diagnostics.blockTags).toBe(true);
       expect(DEFAULT_CONFIG.completion.templateRoot).toBe("templates");
       expect(DEFAULT_CONFIG.html.semanticHighlighting).toBe(true);
     });
@@ -35,10 +36,11 @@ describe("TwigSenseConfig", () => {
 
     it("merges partial diagnostics config", () => {
       const config = mergeWithDefaults({
-        diagnostics: { enabled: true, inlineComments: false },
+        diagnostics: { enabled: true, inlineComments: false, blockTags: false },
       });
       expect(config.diagnostics.enabled).toBe(true);
       expect(config.diagnostics.inlineComments).toBe(false);
+      expect(config.diagnostics.blockTags).toBe(false);
     });
 
     it("applies defaults for missing nested properties", () => {
@@ -47,6 +49,7 @@ describe("TwigSenseConfig", () => {
       } as Partial<TwigSenseConfig>);
       expect(config.diagnostics.enabled).toBe(false);
       expect(config.diagnostics.inlineComments).toBe(true); // default
+      expect(config.diagnostics.blockTags).toBe(true); // default
     });
 
     it("merges partial completion config", () => {
@@ -66,13 +69,14 @@ describe("TwigSenseConfig", () => {
     it("merges multiple partial sections", () => {
       const config = mergeWithDefaults({
         semanticTokens: { enabled: false },
-        diagnostics: { enabled: false, inlineComments: false },
+        diagnostics: { enabled: false, inlineComments: false, blockTags: false },
         completion: { templateRoot: "custom" },
         html: { semanticHighlighting: false },
       });
       expect(config.semanticTokens.enabled).toBe(false);
       expect(config.diagnostics.enabled).toBe(false);
       expect(config.diagnostics.inlineComments).toBe(false);
+      expect(config.diagnostics.blockTags).toBe(false);
       expect(config.completion.templateRoot).toBe("custom");
       expect(config.html.semanticHighlighting).toBe(false);
     });

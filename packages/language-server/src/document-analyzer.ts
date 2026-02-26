@@ -66,7 +66,64 @@ export type BlockType =
   | "sandbox"
   | "verbatim"
   | "cache"
-  | "set";
+  | "set"
+  | "with";
+
+/**
+ * Location information for a tag keyword in the document
+ */
+export interface TagLocation {
+  /** The keyword text (e.g., "if", "endif", "else") */
+  keyword: string;
+  /** Start line (0-indexed) */
+  line: number;
+  /** Start character (0-indexed) */
+  character: number;
+  /** End line (0-indexed) */
+  endLine: number;
+  /** End character (0-indexed) */
+  endCharacter: number;
+}
+
+/**
+ * A cross-nesting anomaly: a closer matched an opener by skipping over
+ * intermediate unclosed blocks on the stack.
+ */
+export interface NestingError {
+  /** The outer block that was matched by the closer */
+  outer: TagLocation;
+  /** The inner block(s) that were "crossed over" (skipped) */
+  inner: TagLocation;
+  /** The closing tag that caused the cross */
+  closer: TagLocation;
+}
+
+/**
+ * A mid-block keyword (else/elseif) that appears in an invalid context.
+ */
+export interface MisplacedKeyword {
+  /** Location of the misplaced keyword */
+  location: TagLocation;
+  /** The block types where this keyword is valid */
+  validParents: string[];
+}
+
+/**
+ * Complete result of tag structure analysis, containing both scope data
+ * and diagnostic data for block tag validation.
+ */
+export interface TagAnalysisResult {
+  /** Successfully paired blocks (same as previous return type) */
+  scopedBlocks: ScopedBlockInfo[];
+  /** Opening tags left on the stack with no matching closer */
+  unclosed: TagLocation[];
+  /** Closing tags with no matching opener (limited to known BLOCK_PAIRS) */
+  orphanClosers: TagLocation[];
+  /** Cross-nesting anomalies where a closer skipped over intermediate blocks */
+  nestingErrors: NestingError[];
+  /** Mid-block keywords (else/elseif) in invalid contexts */
+  misplacedKeywords: MisplacedKeyword[];
+}
 
 /**
  * Information about a scoped block in the document
@@ -357,15 +414,64 @@ const BLOCK_PAIRS: Record<string, string> = {
   verbatim: "endverbatim",
   cache: "endcache",
   set: "endset",
+  with: "endwith",
 };
 
 /**
- * Extract all scoped blocks (if, for, block, macro, etc.) from the document
- * Includes both closed blocks (with end tag) and unclosed blocks (still open at end of document)
+ * Rules for mid-block keywords: maps keyword to the valid parent block types
+ * that can contain it (checked against innermost/stack-top block only).
  */
-export function extractScopedBlocks(tree: Tree): ScopedBlockInfo[] {
-  const blocks: ScopedBlockInfo[] = [];
-  const stack: Array<{ type: BlockType; startLine: number; startCharacter: number }> = [];
+const MID_BLOCK_RULES: Record<string, string[]> = {
+  else: ["if", "for"],
+  elseif: ["if"],
+};
+
+/**
+ * Check if a `set` statement_block is an inline assignment (has `=` operator).
+ * Inline: `{% set x = 1 %}` — should NOT be pushed to pairing stack.
+ * Block-form: `{% set content %}...{% endset %}` — should be pushed.
+ */
+function isInlineSet(statementBlock: SyntaxNode): boolean {
+  for (const child of statementBlock.namedChildren) {
+    if (child.type === "operator" && getNodeText(child) === "=") {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Create a TagLocation from a keyword node and its parent statement_block.
+ * Uses the statement_block's position for line/character (the full tag position).
+ */
+function makeTagLocation(keywordNode: SyntaxNode, statementBlock: SyntaxNode): TagLocation {
+  return {
+    keyword: getNodeText(keywordNode),
+    line: statementBlock.startPosition.row,
+    character: statementBlock.startPosition.column,
+    endLine: statementBlock.endPosition.row,
+    endCharacter: statementBlock.endPosition.column,
+  };
+}
+
+/**
+ * Extract all scoped blocks (if, for, block, macro, etc.) from the document.
+ * Returns a TagAnalysisResult containing both paired blocks and diagnostic data
+ * (unclosed tags, orphan closers, nesting errors, misplaced keywords).
+ */
+export function extractScopedBlocks(tree: Tree): TagAnalysisResult {
+  const scopedBlocks: ScopedBlockInfo[] = [];
+  const unclosed: TagLocation[] = [];
+  const orphanClosers: TagLocation[] = [];
+  const nestingErrors: NestingError[] = [];
+  const misplacedKeywords: MisplacedKeyword[] = [];
+
+  const stack: Array<{
+    type: BlockType;
+    startLine: number;
+    startCharacter: number;
+    tagLocation: TagLocation;
+  }> = [];
 
   // Track the last line of the document for unclosed blocks
   let maxEndLine = 0;
@@ -385,47 +491,108 @@ export function extractScopedBlocks(tree: Tree): ScopedBlockInfo[] {
       if (child.type === "keyword") {
         const text = getNodeText(child);
 
+        // Check for mid-block keywords (else, elseif)
+        if (text in MID_BLOCK_RULES) {
+          const validParents = MID_BLOCK_RULES[text]!;
+          const stackTop = stack[stack.length - 1];
+
+          if (!stackTop || !validParents.includes(stackTop.type)) {
+            misplacedKeywords.push({
+              location: makeTagLocation(child, block),
+              validParents,
+            });
+          }
+          // Valid mid-block keywords don't modify the stack
+          continue;
+        }
+
         // Check if this is an opening keyword
         if (text in BLOCK_PAIRS) {
+          // Inline set heuristic: skip stack push for inline assignments
+          if (text === "set" && isInlineSet(block)) {
+            continue;
+          }
+
           stack.push({
             type: text as BlockType,
             startLine: block.startPosition.row,
             startCharacter: block.startPosition.column,
+            tagLocation: makeTagLocation(child, block),
           });
         }
         // Check if this is a closing keyword
         else if (text.startsWith("end")) {
-          const openingType = text.substring(3) as BlockType;
+          const openingType = text.substring(3);
+
+          // Only track closers whose base keyword is a known block type
+          if (!(openingType in BLOCK_PAIRS)) {
+            // Unknown end* keyword — silently ignore
+            continue;
+          }
+
+          const closerLocation = makeTagLocation(child, block);
+
           // Find the matching opening block (search from end of stack)
+          let matchIndex = -1;
           for (let j = stack.length - 1; j >= 0; j--) {
             const stackItem = stack[j];
             if (stackItem && stackItem.type === openingType) {
-              stack.splice(j, 1);
-              blocks.push({
-                type: stackItem.type,
-                startLine: stackItem.startLine,
-                endLine: block.endPosition.row,
-                startCharacter: stackItem.startCharacter,
-              });
+              matchIndex = j;
               break;
             }
+          }
+
+          if (matchIndex === -1) {
+            // No matching opener found — orphan closer
+            orphanClosers.push(closerLocation);
+          } else {
+            // Check for cross-nesting: items between matchIndex and stack top
+            // were "crossed over" by this closer
+            for (let k = stack.length - 1; k > matchIndex; k--) {
+              const crossedItem = stack[k]!;
+              nestingErrors.push({
+                outer: stack[matchIndex]!.tagLocation,
+                inner: crossedItem.tagLocation,
+                closer: closerLocation,
+              });
+            }
+
+            // Remove matched item and any crossed items
+            const matchedItem = stack[matchIndex]!;
+            stack.splice(matchIndex);
+
+            scopedBlocks.push({
+              type: matchedItem.type,
+              startLine: matchedItem.startLine,
+              endLine: block.endPosition.row,
+              startCharacter: matchedItem.startCharacter,
+            });
           }
         }
       }
     }
   }
 
-  // Add any unclosed blocks from the stack (they extend to the end of the document)
+  // Any remaining items on the stack are unclosed blocks
   for (const openBlock of stack) {
-    blocks.push({
+    unclosed.push(openBlock.tagLocation);
+
+    // Still add to scopedBlocks for backward compatibility (scope detection)
+    scopedBlocks.push({
       type: openBlock.type,
       startLine: openBlock.startLine,
-      endLine: maxEndLine + 1000, // Use a large number to represent "extends to end of document"
+      endLine: maxEndLine + 1000,
       startCharacter: openBlock.startCharacter,
     });
   }
 
-  return blocks;
+  return {
+    scopedBlocks,
+    unclosed,
+    orphanClosers,
+    nestingErrors,
+    misplacedKeywords,
+  };
 }
 
 /**
@@ -444,7 +611,7 @@ export function analyzeDocument(tree: Tree): DocumentAnalysis {
  * Get scope information at a specific position in the document
  */
 export function getScopeAtPosition(tree: Tree, line: number, _character: number): ScopeInfo {
-  const scopedBlocks = extractScopedBlocks(tree);
+  const { scopedBlocks } = extractScopedBlocks(tree);
   const analysis = analyzeDocument(tree);
 
   const blockStack: ScopeInfo["blockStack"] = [];

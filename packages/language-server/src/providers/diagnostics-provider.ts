@@ -1,6 +1,7 @@
 import { Diagnostic, ServerCapabilities } from "vscode-languageserver/node";
 import type { Tree } from "web-tree-sitter";
 import { validateInlineComments } from "../validators/inline-comments";
+import { validateBlockTags } from "../validators/block-tags";
 import type { FeatureProvider, ProviderContext } from "./types";
 
 /**
@@ -50,6 +51,11 @@ export class DiagnosticsProvider implements FeatureProvider {
     // Validate inline comments
     if (config.diagnostics.inlineComments) {
       diagnostics.push(...validateInlineComments(tree));
+    }
+
+    // Validate block tags
+    if (config.diagnostics.blockTags) {
+      diagnostics.push(...validateBlockTags(tree));
     }
 
     connection.sendDiagnostics({ uri, diagnostics });

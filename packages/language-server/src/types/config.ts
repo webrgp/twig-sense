@@ -10,6 +10,7 @@ export interface TwigSenseConfig {
   diagnostics: {
     enabled: boolean;
     inlineComments: boolean;
+    blockTags: boolean;
   };
   completion: {
     templateRoot: string;
@@ -30,6 +31,7 @@ export const DEFAULT_CONFIG: TwigSenseConfig = {
   diagnostics: {
     enabled: true,
     inlineComments: true,
+    blockTags: true,
   },
   completion: {
     templateRoot: "templates",
@@ -53,6 +55,7 @@ export function mergeWithDefaults(partial: Partial<TwigSenseConfig> | undefined)
       enabled: partial?.diagnostics?.enabled ?? DEFAULT_CONFIG.diagnostics.enabled,
       inlineComments:
         partial?.diagnostics?.inlineComments ?? DEFAULT_CONFIG.diagnostics.inlineComments,
+      blockTags: partial?.diagnostics?.blockTags ?? DEFAULT_CONFIG.diagnostics.blockTags,
     },
     completion: {
       templateRoot: partial?.completion?.templateRoot ?? DEFAULT_CONFIG.completion.templateRoot,

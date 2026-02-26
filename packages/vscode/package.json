@@ -96,6 +96,11 @@
           "default": true,
           "description": "Enable warnings for inline comments that may consume closing delimiters"
         },
+        "twig-sense.diagnostics.blockTags": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable warnings for block tag issues (unclosed tags, orphan closers, nesting errors, misplaced keywords)"
+        },
         "twig-sense.completion.templateRoot": {
           "type": "string",
           "default": "templates",
