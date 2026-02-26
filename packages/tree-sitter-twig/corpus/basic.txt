@@ -74,3 +74,17 @@ Whitespace control
 (source_file
   (output_statement
     (identifier)))
+
+================================================================================
+With / endwith block
+================================================================================
+
+{% with %}{% endwith %}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (statement_block
+    (keyword))
+  (statement_block
+    (keyword)))

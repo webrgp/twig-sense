@@ -48,6 +48,7 @@ module.exports = grammar({
         "from",
         "as",
         "with",
+        "endwith",
         "apply",
         "endapply",
         "autoescape",
