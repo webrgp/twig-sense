@@ -8,7 +8,8 @@ describe("TwigSenseConfig", () => {
       expect(DEFAULT_CONFIG.diagnostics.enabled).toBe(true);
       expect(DEFAULT_CONFIG.diagnostics.inlineComments).toBe(true);
       expect(DEFAULT_CONFIG.diagnostics.blockTags).toBe(true);
-      expect(DEFAULT_CONFIG.completion.templateRoot).toBe("templates");
+      expect(DEFAULT_CONFIG.templates.root).toBe("templates");
+      expect(DEFAULT_CONFIG.templates.fileExtension).toBe(".twig");
       expect(DEFAULT_CONFIG.html.semanticHighlighting).toBe(true);
     });
   });
@@ -31,7 +32,7 @@ describe("TwigSenseConfig", () => {
       expect(config.semanticTokens.enabled).toBe(false);
       // Other sections should use defaults
       expect(config.diagnostics.enabled).toBe(true);
-      expect(config.completion.templateRoot).toBe("templates");
+      expect(config.templates.root).toBe("templates");
     });
 
     it("merges partial diagnostics config", () => {
@@ -52,11 +53,28 @@ describe("TwigSenseConfig", () => {
       expect(config.diagnostics.blockTags).toBe(true); // default
     });
 
-    it("merges partial completion config", () => {
+    it("merges partial templates config with root only", () => {
       const config = mergeWithDefaults({
-        completion: { templateRoot: "views" },
+        templates: { root: "views" },
+      } as Partial<TwigSenseConfig>);
+      expect(config.templates.root).toBe("views");
+      expect(config.templates.fileExtension).toBe(".twig"); // default
+    });
+
+    it("merges partial templates config with fileExtension only", () => {
+      const config = mergeWithDefaults({
+        templates: { fileExtension: ".html.twig" },
+      } as Partial<TwigSenseConfig>);
+      expect(config.templates.root).toBe("templates"); // default
+      expect(config.templates.fileExtension).toBe(".html.twig");
+    });
+
+    it("merges full templates config", () => {
+      const config = mergeWithDefaults({
+        templates: { root: "views", fileExtension: ".html.twig" },
       });
-      expect(config.completion.templateRoot).toBe("views");
+      expect(config.templates.root).toBe("views");
+      expect(config.templates.fileExtension).toBe(".html.twig");
     });
 
     it("merges partial html config", () => {
@@ -70,14 +88,15 @@ describe("TwigSenseConfig", () => {
       const config = mergeWithDefaults({
         semanticTokens: { enabled: false },
         diagnostics: { enabled: false, inlineComments: false, blockTags: false },
-        completion: { templateRoot: "custom" },
+        templates: { root: "custom", fileExtension: ".html.twig" },
         html: { semanticHighlighting: false },
       });
       expect(config.semanticTokens.enabled).toBe(false);
       expect(config.diagnostics.enabled).toBe(false);
       expect(config.diagnostics.inlineComments).toBe(false);
       expect(config.diagnostics.blockTags).toBe(false);
-      expect(config.completion.templateRoot).toBe("custom");
+      expect(config.templates.root).toBe("custom");
+      expect(config.templates.fileExtension).toBe(".html.twig");
       expect(config.html.semanticHighlighting).toBe(false);
     });
 

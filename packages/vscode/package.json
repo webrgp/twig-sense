@@ -101,10 +101,15 @@
           "default": true,
           "description": "Enable warnings for block tag issues (unclosed tags, orphan closers, nesting errors, misplaced keywords)"
         },
-        "twig-sense.completion.templateRoot": {
+        "twig-sense.templates.root": {
           "type": "string",
           "default": "templates",
-          "description": "The root directory for template files, relative to the workspace root. Used for resolving template paths in completions."
+          "description": "The root directory for template files, relative to the workspace root. Used for resolving template paths in completions and Go to Definition."
+        },
+        "twig-sense.templates.fileExtension": {
+          "type": "string",
+          "default": ".twig",
+          "description": "The file extension for template files. Used when resolving template paths that don't include an extension."
         },
         "twig-sense.html.semanticHighlighting": {
           "type": "boolean",

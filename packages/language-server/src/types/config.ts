@@ -12,8 +12,9 @@ export interface TwigSenseConfig {
     inlineComments: boolean;
     blockTags: boolean;
   };
-  completion: {
-    templateRoot: string;
+  templates: {
+    root: string;
+    fileExtension: string;
   };
   html: {
     semanticHighlighting: boolean;
@@ -33,8 +34,9 @@ export const DEFAULT_CONFIG: TwigSenseConfig = {
     inlineComments: true,
     blockTags: true,
   },
-  completion: {
-    templateRoot: "templates",
+  templates: {
+    root: "templates",
+    fileExtension: ".twig",
   },
   html: {
     semanticHighlighting: true,
@@ -57,8 +59,9 @@ export function mergeWithDefaults(partial: Partial<TwigSenseConfig> | undefined)
         partial?.diagnostics?.inlineComments ?? DEFAULT_CONFIG.diagnostics.inlineComments,
       blockTags: partial?.diagnostics?.blockTags ?? DEFAULT_CONFIG.diagnostics.blockTags,
     },
-    completion: {
-      templateRoot: partial?.completion?.templateRoot ?? DEFAULT_CONFIG.completion.templateRoot,
+    templates: {
+      root: partial?.templates?.root ?? DEFAULT_CONFIG.templates.root,
+      fileExtension: partial?.templates?.fileExtension ?? DEFAULT_CONFIG.templates.fileExtension,
     },
     html: {
       semanticHighlighting:

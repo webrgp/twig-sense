@@ -204,6 +204,148 @@ suite("Extension Test Suite", () => {
     });
   });
 
+  suite("Go to Definition", () => {
+    const definitionFixture = path.join(fixturesPath, "definition-test.twig");
+    const templatesDir = path.join(fixturesPath, "templates");
+
+    // Helper to get definition results at a position in the fixture file
+    async function getDefinitions(
+      document: vscode.TextDocument,
+      line: number,
+      character: number
+    ): Promise<vscode.Location[]> {
+      const position = new vscode.Position(line, character);
+      const locations = await vscode.commands.executeCommand<vscode.Location[]>(
+        "vscode.executeDefinitionProvider",
+        document.uri,
+        position
+      );
+      return locations ?? [];
+    }
+
+    test("Navigates to included template with extension", async () => {
+      const document = await vscode.workspace.openTextDocument(definitionFixture);
+      await vscode.window.showTextDocument(document);
+      await waitForLanguageServer();
+
+      // Line 1: {% include "header.twig" %}
+      // Cursor on "header.twig" string (column 13 is inside the string)
+      const locations = await getDefinitions(document, 1, 13);
+
+      assert.ok(locations.length > 0, "Should return at least one definition location");
+      const targetPath = vscode.Uri.parse(locations[0]!.uri.toString()).fsPath;
+      const expectedPath = path.join(templatesDir, "header.twig");
+      assert.strictEqual(
+        path.normalize(targetPath),
+        path.normalize(expectedPath),
+        "Should navigate to templates/header.twig"
+      );
+    });
+
+    test("Navigates to included template without extension", async () => {
+      const document = await vscode.workspace.openTextDocument(definitionFixture);
+      await vscode.window.showTextDocument(document);
+      await waitForLanguageServer();
+
+      // Line 2: {% include "header" %}
+      // Cursor on "header" string
+      const locations = await getDefinitions(document, 2, 13);
+
+      assert.ok(locations.length > 0, "Should resolve template path by appending .twig");
+      const targetPath = vscode.Uri.parse(locations[0]!.uri.toString()).fsPath;
+      const expectedPath = path.join(templatesDir, "header.twig");
+      assert.strictEqual(
+        path.normalize(targetPath),
+        path.normalize(expectedPath),
+        "Should navigate to templates/header.twig even without extension"
+      );
+    });
+
+    test("Navigates to nested template path", async () => {
+      const document = await vscode.workspace.openTextDocument(definitionFixture);
+      await vscode.window.showTextDocument(document);
+      await waitForLanguageServer();
+
+      // Line 3: {% include "partials/nav.twig" %}
+      // Cursor on "partials/nav.twig" string
+      const locations = await getDefinitions(document, 3, 13);
+
+      assert.ok(locations.length > 0, "Should resolve nested template path");
+      const targetPath = vscode.Uri.parse(locations[0]!.uri.toString()).fsPath;
+      const expectedPath = path.join(templatesDir, "partials", "nav.twig");
+      assert.strictEqual(
+        path.normalize(targetPath),
+        path.normalize(expectedPath),
+        "Should navigate to templates/partials/nav.twig"
+      );
+    });
+
+    test("Navigates to included template with single quotes", async () => {
+      const document = await vscode.workspace.openTextDocument(definitionFixture);
+      await vscode.window.showTextDocument(document);
+      await waitForLanguageServer();
+
+      // Line 4: {% include 'header.twig' %}
+      // Cursor on 'header.twig' string
+      const locations = await getDefinitions(document, 4, 13);
+
+      assert.ok(locations.length > 0, "Should resolve single-quoted template path");
+      const targetPath = vscode.Uri.parse(locations[0]!.uri.toString()).fsPath;
+      const expectedPath = path.join(templatesDir, "header.twig");
+      assert.strictEqual(
+        path.normalize(targetPath),
+        path.normalize(expectedPath),
+        "Should navigate to templates/header.twig with single quotes"
+      );
+    });
+
+    test("Returns no definitions for nonexistent template", async () => {
+      const document = await vscode.workspace.openTextDocument(definitionFixture);
+      await vscode.window.showTextDocument(document);
+      await waitForLanguageServer();
+
+      // Line 5: {% include "nonexistent.twig" %}
+      // Cursor on "nonexistent.twig" string
+      const locations = await getDefinitions(document, 5, 13);
+
+      assert.strictEqual(
+        locations.length,
+        0,
+        "Should return no definitions for nonexistent template"
+      );
+    });
+
+    test("Returns no definitions for non-include tag", async () => {
+      const document = await vscode.workspace.openTextDocument(definitionFixture);
+      await vscode.window.showTextDocument(document);
+      await waitForLanguageServer();
+
+      // Line 6: {% block "header.twig" %}{% endblock %}
+      // Cursor on "header.twig" string inside a block tag (not include)
+      const locations = await getDefinitions(document, 6, 11);
+
+      assert.strictEqual(
+        locations.length,
+        0,
+        "Should not provide definitions for strings in non-include tags"
+      );
+    });
+
+    test("Definition target points to beginning of file", async () => {
+      const document = await vscode.workspace.openTextDocument(definitionFixture);
+      await vscode.window.showTextDocument(document);
+      await waitForLanguageServer();
+
+      // Line 1: {% include "header.twig" %}
+      const locations = await getDefinitions(document, 1, 13);
+
+      assert.ok(locations.length > 0, "Should return a definition location");
+      const range = locations[0]!.range;
+      assert.strictEqual(range.start.line, 0, "Definition should point to line 0");
+      assert.strictEqual(range.start.character, 0, "Definition should point to character 0");
+    });
+  });
+
   suite("Syntax Highlighting", () => {
     test("TextMate grammar provides highlighting for inline comments", async () => {
       // Create a document with inline comment syntax

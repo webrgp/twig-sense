@@ -19,7 +19,7 @@ The language server SHALL establish a connection with the VSCode client using JS
 #### Scenario: Server capabilities
 
 - **WHEN** the server responds to `initialize` request
-- **THEN** it declares support for `textDocumentSync`, `completionProvider`, and `semanticTokensProvider`
+- **THEN** it declares support for `textDocumentSync`, `completionProvider`, `semanticTokensProvider`, and `definitionProvider`
 
 ### Requirement: Document Synchronization
 
@@ -306,17 +306,27 @@ All block tag diagnostics SHALL use consistent properties.
 
 ### Requirement: Template Root Configuration
 
-The extension SHALL provide a configuration setting for the template root directory.
+The extension SHALL provide configuration settings for template path resolution under the `twig-sense.templates` namespace.
 
 #### Scenario: Default template root
 
-- **WHEN** user has not configured `twig-sense.completion.templateRoot`
+- **WHEN** user has not configured `twig-sense.templates.root`
 - **THEN** the default value is `templates` relative to workspace root
 
 #### Scenario: Custom template root
 
-- **WHEN** user sets `twig-sense.completion.templateRoot` to `views`
+- **WHEN** user sets `twig-sense.templates.root` to `views`
 - **THEN** template path resolution uses `views` as the root directory
+
+#### Scenario: Default file extension
+
+- **WHEN** user has not configured `twig-sense.templates.fileExtension`
+- **THEN** the default value is `.twig`
+
+#### Scenario: Custom file extension
+
+- **WHEN** user sets `twig-sense.templates.fileExtension` to `.html.twig`
+- **THEN** template path resolution appends `.html.twig` to extensionless paths
 
 ### Requirement: Completion Documentation
 
@@ -456,18 +466,23 @@ The language server SHALL define a TypeScript interface for all configuration op
 - **WHEN** code accesses configuration properties
 - **THEN** TypeScript provides type checking and autocompletion for all configuration paths
 - **AND** this includes the `diagnostics.blockTags` property
+- **AND** this includes the `templates.root` and `templates.fileExtension` properties
 
 #### Scenario: Default values applied
 
 - **WHEN** user has partial or no configuration
 - **THEN** sensible defaults are applied via `mergeWithDefaults()` function
 - **AND** `diagnostics.blockTags` defaults to `true`
+- **AND** `templates.root` defaults to `"templates"`
+- **AND** `templates.fileExtension` defaults to `".twig"`
 
 #### Scenario: Configuration schema consistency
 
 - **WHEN** the TwigSenseConfig interface is compared to package.json contributes
 - **THEN** all properties match in name and type
 - **AND** `twig-sense.diagnostics.blockTags` is present in both
+- **AND** `twig-sense.templates.root` is present in both
+- **AND** `twig-sense.templates.fileExtension` is present in both
 
 ### Requirement: Feature Provider Interface
 
@@ -587,3 +602,18 @@ The language server SHALL maintain a `BlockType` union type and `BLOCK_PAIRS` ma
 - **WHEN** the `BlockType` union and `BLOCK_PAIRS` map are defined
 - **THEN** `"with"` is included as a block type with `"endwith"` as its closer
 - **AND** the tree-sitter grammar's keyword list includes both `"with"` and `"endwith"`
+
+### Requirement: Provider Context Workspace Access
+
+The `ProviderContext` SHALL include workspace folder information so providers can resolve workspace-relative paths.
+
+#### Scenario: Workspace folders available to providers
+
+- **WHEN** a provider's `register()` method is called with `ProviderContext`
+- **THEN** the context includes a `workspaceFolders` property containing the client's workspace folders
+
+#### Scenario: Fallback from rootUri
+
+- **WHEN** the client's `InitializeParams` does not include `workspaceFolders`
+- **AND** the client provides `rootUri`
+- **THEN** `ProviderContext.workspaceFolders` contains a single entry derived from `rootUri`

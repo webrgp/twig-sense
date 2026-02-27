@@ -20,7 +20,7 @@ function createMockContext(configOverrides?: Partial<TwigSenseConfig>): {
       ...configOverrides?.diagnostics,
     },
     ...(configOverrides?.semanticTokens && { semanticTokens: configOverrides.semanticTokens }),
-    ...(configOverrides?.completion && { completion: configOverrides.completion }),
+    ...(configOverrides?.templates && { templates: configOverrides.templates }),
     ...(configOverrides?.html && { html: configOverrides.html }),
   };
 
@@ -35,6 +35,7 @@ function createMockContext(configOverrides?: Partial<TwigSenseConfig>): {
       }),
       getConfig: vi.fn(async () => config),
     } as unknown as ProviderContext["documents"],
+    workspaceFolders: [],
   };
 
   return {

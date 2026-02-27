@@ -1,4 +1,4 @@
-import { Connection, ServerCapabilities } from "vscode-languageserver/node";
+import { Connection, ServerCapabilities, WorkspaceFolder } from "vscode-languageserver/node";
 import type { DocumentManager } from "../document-manager";
 
 /**
@@ -10,6 +10,8 @@ export interface ProviderContext {
   connection: Connection;
   /** Document manager for accessing documents and parsed trees */
   documents: DocumentManager;
+  /** Workspace folders for resolving workspace-relative paths */
+  workspaceFolders: WorkspaceFolder[];
 }
 
 /**

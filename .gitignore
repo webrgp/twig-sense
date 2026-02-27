@@ -40,5 +40,5 @@ coverage/
 *.log
 npm-debug.log*
 
-# bv (beads viewer) local config and caches
-.bv/
+# Agent relay
+.agent-relay
